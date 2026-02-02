@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    container_name: investlink_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: investlink
+      POSTGRES_PASSWORD: investlink
+      POSTGRES_DB: investlink
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
