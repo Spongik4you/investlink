@@ -15,7 +15,7 @@ export default function IconCircle({
       : "bg-blue-50 text-blue-700";
 
   return (
-    <div className={`mx-auto grid h-14 w-14 place-items-center rounded-full ${cls}`}>
+    <div className={`mx-auto grid h-13 w-13 place-items-center rounded-full ${cls}`}>
       <Icon className="h-7 w-7" strokeWidth={2.2} />
     </div>
   );

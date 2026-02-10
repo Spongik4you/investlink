@@ -5,12 +5,27 @@ export default function Footer() {
     <footer className="mt-24 bg-slate-900 text-slate-200">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-5">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-600 text-white">
-              ↗
-            </span>
-            <span className="text-sm font-semibold">InvestLink</span>
+        <Link href="/" className="group flex items-center gap-2 font-bold text-slate-900">
+          <div className="grid h-9 w-9 place-items-center rounded-md bg-blue-700 text-white
+                        transition-transform duration-200 group-hover:scale-105" aria-hidden="true">
+            <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.0"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {/* trending line */}
+                <path d="M4 16l6-6 4 4 6-6" />
+                {/* arrow corner */}
+                <path d="M20 8v6" />
+                <path d="M20 8h-6" />
+              </svg>
           </div>
+          <span className="text-lg font-bold tracking-tight text-slate-900 text-white">InvestLink</span>
+        </Link>
           <p className="mt-4 max-w-sm text-sm text-slate-300">
             Connecting investors, startups, and experts in a trusted global ecosystem.
           </p>

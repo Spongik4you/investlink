@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen bg-white text-slate-900">
         <Navbar />
-        <main>{children}</main>
+        <main className="px-4">{children}</main>
         <Footer />
       </body>
     </html>

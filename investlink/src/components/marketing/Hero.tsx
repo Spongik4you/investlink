@@ -3,13 +3,13 @@ import Link from "next/link";
 export default function Hero() {
   return (
     <section className="bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
+      <div className="mx-auto max-w-6xl px-4 py-14 md:py-13">
         <div className="flex flex-col items-center text-center">
           <div className="rounded-full border border-blue-100 bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-700">
             Join 5,000+ Investors Worldwide
           </div>
 
-          <h1 className="mt-6 max-w-3xl text-4xl font-extrabold tracking-tight md:text-5xl">
+          <h1 className="mt-3 max-w-3xl text-4xl font-extrabold tracking-tight md:text-5xl">
             Where Investors, Startups and <br className="hidden md:block" />
             Experts Build the Future <br className="hidden md:block" />
             Together

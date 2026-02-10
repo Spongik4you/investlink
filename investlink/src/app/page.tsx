@@ -1,6 +1,9 @@
 import Hero from "@/components/marketing/Hero";
 import StatsRow from "@/components/marketing/StatsRow";
 import SectionTitle from "@/components/marketing/SectionTitle";
+import { Target, Rocket, Users } from "lucide-react";
+import IconTile from "@/components/ui/IconTile";
+
 
 export default function HomePage() {
   return (
@@ -18,29 +21,50 @@ export default function HomePage() {
             title="The Challenge in Today's Investment Landscape"
             subtitle="Three groups struggle to connect in the fragmented startup ecosystem"
           />
+
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {[
               {
                 t: "Investors",
                 d: "Can't find trusted, verified deal flow. Too much risk, limited transparency, and scattered opportunities.",
+                icon: Target,
+                tone: "red",
               },
               {
                 t: "Startups",
                 d: "Struggle to access capital and find the right experts to help them grow. Building teams is expensive.",
+                icon: Rocket,
+                tone: "orange",
               },
               {
                 t: "Experts",
                 d: "Can't easily discover serious startup projects or negotiate fair compensation for specialized skills.",
+                icon: Users,
+                tone: "purple",
               },
             ].map((x) => (
-              <div key={x.t} className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
-                <h3 className="font-semibold">{x.t}</h3>
-                <p className="mt-2 text-sm text-slate-600">{x.d}</p>
+              <div
+                key={x.t}
+                className="rounded-md border border-slate-100 bg-white p-6 shadow-sm "
+              >
+                {/* icon */}
+                <IconTile Icon={x.icon} tone={x.tone as any} />
+
+                {/* title */}
+                <h3 className="mt-0 text-md font-semibold text-slate-900">
+                  {x.t}
+                </h3>
+
+                {/* description */}
+                <p className="text-slate-600 text-sm">
+                  {x.d}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
+
 
       <section className="bg-white py-16">
         <div className="mx-auto max-w-6xl px-4">
