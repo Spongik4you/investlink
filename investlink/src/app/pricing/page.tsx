@@ -46,7 +46,7 @@ export default function PricingPage() {
               </ul>
 
               <Link
-                href="/signin"
+                href="/auth/signup"
                 className="mt-8 inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
               >
                 Get Started →
@@ -222,7 +222,7 @@ export default function PricingPage() {
             </p>
             <div className="mt-6">
               <Link
-                href="/signin"
+                href="/auth/signup"
                 className="inline-flex items-center justify-center rounded-md bg-green-600 px-6 py-3 text-sm font-semibold text-white hover:bg-green-700"
               >
                 Start Your Free Trial →
@@ -243,7 +243,7 @@ export default function PricingPage() {
           </p>
           <div className="mt-8">
             <Link
-              href="/signin"
+              href="/auth/signup"
               className="inline-flex items-center justify-center rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
             >
               Join for $1/month →

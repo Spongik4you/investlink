@@ -65,11 +65,11 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/signin" className="text-sm font-semibold text-slate-600 hover:text-slate-900">
+          <Link href="/auth/signin" className="text-sm font-semibold text-slate-600 hover:text-slate-900">
             Sign In
           </Link>
           <Link
-            href="/pricing"
+            href="/auth/signup"
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
           >
             Get Started
