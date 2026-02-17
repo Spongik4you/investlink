@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -11,8 +11,7 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const sp = useSearchParams();
-  const callbackUrl = sp.get("callbackUrl") ?? "/";
+  const callbackUrl = "/auth/continue";
 
   async function onSubmit() {
     setErr(null);
@@ -41,6 +40,23 @@ export default function SignInPage() {
           <p className="mt-2 text-lg text-slate-600">
             Email &amp; password.
           </p>
+
+          <div className="mt-5 space-y-2">
+            <button
+              className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+              onClick={() => signIn("google", { callbackUrl })}
+            >
+              Continue with Google
+            </button>
+            <button
+              className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+              onClick={() => signIn("linkedin", { callbackUrl })}
+            >
+              Continue with LinkedIn
+            </button>
+          </div>
+
+          <div className="mt-4 text-center text-xs uppercase tracking-wide text-slate-400">or</div>
 
           <div className="mt-6 space-y-6">
             <div>

@@ -4,6 +4,8 @@ import SectionTitle from "@/components/marketing/SectionTitle";
 import { Target, Rocket, Users } from "lucide-react";
 import IconTile from "@/components/ui/IconTile";
 
+type IconTone = "red" | "orange" | "purple";
+
 
 export default function HomePage() {
   return (
@@ -48,7 +50,7 @@ export default function HomePage() {
                 className="rounded-md border border-slate-100 bg-white p-6 shadow-sm "
               >
                 {/* icon */}
-                <IconTile Icon={x.icon} tone={x.tone as any} />
+                <IconTile Icon={x.icon} tone={x.tone as IconTone} />
 
                 {/* title */}
                 <h3 className="mt-0 text-md font-semibold text-slate-900">

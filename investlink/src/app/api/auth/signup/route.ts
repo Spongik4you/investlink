@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
+import { UserType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function parseRole(role: string): UserType {
+  if (role === "EXPERT" || role === "INVESTOR" || role === "STARTUP") {
+    return role;
+  }
+
+  return "STARTUP";
 }
 
 export async function POST(req: Request) {
@@ -14,6 +23,7 @@ export async function POST(req: Request) {
     const phone = String(body?.phone ?? "").trim();
     const password = String(body?.password ?? "");
     const confirmPassword = String(body?.confirmPassword ?? "");
+    const type = parseRole(String(body?.role ?? "STARTUP").toUpperCase());
 
     if (!name || !email || !phone || !password || !confirmPassword) {
       return NextResponse.json({ error: "Completează toate câmpurile." }, { status: 400 });
@@ -46,13 +56,14 @@ export async function POST(req: Request) {
         email,
         phone,
         passwordHash,
-        type: "STARTUP", // default MVP; îl schimbăm după role-select / onboarding
+        type,
+        onboardingStatus: "NOT_STARTED",
       },
-      select: { id: true, name: true, email: true, phone: true, type: true, createdAt: true },
+      select: { id: true, name: true, email: true, phone: true, type: true, onboardingStatus: true, createdAt: true },
     });
 
     return NextResponse.json({ user }, { status: 201 });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Eroare la înregistrare." }, { status: 500 });
   }
 }
