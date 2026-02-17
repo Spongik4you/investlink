@@ -20,24 +20,75 @@ enum VerificationStatus {
   REJECTED
 }
 
-model User {
-  id                 String   @id @default(cuid())
-  email              String   @unique
-  name               String?
-  phone              String?  @unique @default("NONE")
-  image              String?
-  passwordHash       String?
-  type               UserType @default(STARTUP)
-  verificationStatus VerificationStatus @default(UNVERIFIED)
-
-  emailVerified      DateTime?
-  accounts           Account[]
-  sessions           Session[]
-
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
 }
 
+model User {
+  id                 String             @id @default(cuid())
+  email              String             @unique
+  name               String?
+  phone              String?            @unique
+  image              String?
+  passwordHash       String?
+  type               UserType           @default(STARTUP)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  onboardingStatus   OnboardingStatus   @default(NOT_STARTED)
+
+  emailVerified DateTime?
+  accounts      Account[]
+  sessions      Session[]
+
+  expertProfile   ExpertProfile?
+  investorProfile InvestorProfile?
+  startupProfile  StartupProfile?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ExpertProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  headline               String?
+  yearsExperience        Int?
+  areasOfExpertise       String[]
+  collaborationInterests String[]
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InvestorProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  investorType    String?
+  budgetRange     String?
+  riskAppetite    String?
+  investmentFocus String[]
+  strategicNotes  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StartupProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  companyName  String?
+  companyStage String?
+  website      String?
+  shortPitch   String?
+  fundingGoal  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
 model Account {
   id                String  @id @default(cuid())

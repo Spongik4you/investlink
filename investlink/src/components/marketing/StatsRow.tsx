@@ -1,10 +1,10 @@
-import { Users, Rocket, Globe, TrendingUp } from "lucide-react";
+import { Users, Rocket, Globe, TrendingUp, type LucideIcon } from "lucide-react";
 import IconCircle from "@/components/ui/IconCircle";
 
 type StatProps = {
   value: string;
   label: string;
-  Icon: any;
+  Icon: LucideIcon;
 };
 
 const Stat = ({ value, label, Icon }: StatProps) => (
