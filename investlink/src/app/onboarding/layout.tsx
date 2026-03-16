@@ -36,7 +36,7 @@ function OnboardingNavbar() {
 export default function OnboardingLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-white">
-      <OnboardingNavbar />
+      {/* <OnboardingNavbar /> */}
       <main className="mx-auto w-full max-w-6xl px-6 py-10">{children}</main>
     </div>
   );

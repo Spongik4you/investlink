@@ -21,9 +21,7 @@ export default async function ContinuePage() {
 
   // If onboarding in progress, send to the right step-1 for now
   if (user.onboardingStatus === "IN_PROGRESS") {
-    if (user.type === "EXPERT") redirect("/onboarding/expert/step-1");
-    if (user.type === "INVESTOR") redirect("/onboarding/investor/step-1");
-    redirect("/dashboard/startup");
+    redirect("/onboarding");
   }
 
   // Completed
