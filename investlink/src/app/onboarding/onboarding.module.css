@@ -353,6 +353,8 @@ select.formInput { cursor: pointer; appearance: none; background-image: url("dat
 
 .formRow3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 
+.otherInputWrap {display: none;}
+
 /* ── CHOICE CHIPS ── */
 .chipGroup { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { padding: 8px 16px; border-radius: 100px; border: 1.5px solid var(--gray-200); font-size: 13px; font-weight: 500; color: var(--gray-600); cursor: pointer; transition: all .15s; user-select: none; background: #fff; }
