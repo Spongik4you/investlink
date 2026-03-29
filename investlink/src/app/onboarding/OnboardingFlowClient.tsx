@@ -3,7 +3,6 @@
 import styles from "./onboarding.module.css";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 import OnboardingShell from "@/components/onboarding/OnboardingShell";
 import LeftPanel from "@/components/onboarding/LeftPanel";
@@ -16,8 +15,19 @@ import InvestorStep4 from "@/components/onboarding/investors/InvestorStep4";
 import InvestorStep5 from "@/components/onboarding/investors/InvestorStep5";
 import InvestorStep6 from "@/components/onboarding/investors/InvestorStep6";
 
+import StartupStep1 from "@/components/onboarding/startup/StartupStep1";
+import StartupStep2 from "@/components/onboarding/startup/StartupStep2";
+import StartupStep3 from "@/components/onboarding/startup/StartupStep3";
+import StartupStep4 from "@/components/onboarding/startup/StartupStep4";
+import StartupStep5 from "@/components/onboarding/startup/StartupStep5";
+import StartupStep6 from "@/components/onboarding/startup/StartupStep6";
 
-import { AirVentIcon } from "lucide-react";
+import ExpertStep1 from "@/components/onboarding/experts/ExpertStep1";
+import ExpertStep2 from "@/components/onboarding/experts/ExpertStep2";
+import ExpertStep3 from "@/components/onboarding/experts/ExpertStep3";
+import ExpertStep4 from "@/components/onboarding/experts/ExpertStep4";
+import ExpertStep5 from "@/components/onboarding/experts/ExpertStep5";
+import ExpertStep6 from "@/components/onboarding/experts/ExpertStep6";
 
 type RoleKey = "investor" | "startup" | "expert";
 
@@ -81,48 +91,6 @@ export default function OnboardingFlowClient() {
   const [investorType, setInvestorType] = useState<
     "angel" | "vc" | "family" | "pe" | "corp" | "inst" | "other"
   >("angel");
-
-  function toggleInArray(
-    value: string,
-    setFn: React.Dispatch<React.SetStateAction<string[]>>
-  ) {
-    setFn((prev) =>
-      prev.includes(value) ? prev.filter((x) => x !== value) : [...prev, value]
-    );
-  }
-
-
-  function toggleWithLimit(
-    value: string,
-    max: number,
-    setFn: React.Dispatch<React.SetStateAction<string[]>>
-  ) {
-    setFn((prev) => {
-      if (prev.includes(value)) return prev.filter((x) => x !== value);
-      if (prev.length >= max) return prev; // nu mai adăugăm dacă e full
-      return [...prev, value];
-    });
-  }
-
-  //<---STEP 6 (pentru investitori)--->
-    const [notif, setNotif] = useState({
-    newDeals: true,
-    execution: true,
-    digest: true,
-    expertReports: false,
-    marketAlerts: false,
-    securityUpdates: true,
-  });
-
-  //<-----STARTAPP STEP 1----->
-  const [startupCompanyName, setStartupCompanyName] = useState("");
-  const [startupLegalType, setStartupLegalType] = useState("LLC");
-  const [startupCountry, setStartupCountry] = useState("United States");
-  const [startupYearFounded, setStartupYearFounded] = useState("");
-  const [startupWebsite, setStartupWebsite] = useState("");
-  const [startupOneLiner, setStartupOneLiner] = useState("");
-  const [startupDescription, setStartupDescription] = useState("");
-  const [startupKeyMetric, setStartupKeyMetric] = useState("");
 
   const progressPct = useMemo(() => {
     if (step === 0) return 0;
@@ -280,142 +248,49 @@ return (
         <InvestorStep6 onBack={prevStep} onComplete={completeProfile} />
       )}
 
-      {/* STEP 1: STARTUP - Company Identity */}
+      {/* STARTUP steps 1–6 */}
       {role === "startup" && step === 1 && (
-        <div className={[styles.stepForm, styles.active].join(" ")}>
-          <div className={styles.stepHeader}>
-            <div className={styles.stepTag}>Company Identity</div>
-            <div className={styles.stepTitle}>Tell us about your startup</div>
-            <div className={styles.stepSub}>
-              Basic information to create your company profile and start the verification process.
-            </div>
-          </div>
-
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Company Name</label>
-              <input
-                className={styles.formInput}
-                placeholder="TechCore Inc."
-                type="text"
-                value={startupCompanyName}
-                onChange={(e) => setStartupCompanyName(e.target.value)}
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Legal Entity Type</label>
-              <select
-                className={styles.formInput}
-                value={startupLegalType}
-                onChange={(e) => setStartupLegalType(e.target.value)}
-              >
-                <option>LLC</option>
-                <option>C-Corp</option>
-                <option>S-Corp</option>
-                <option>Ltd</option>
-                <option>GmbH</option>
-                <option>Not yet incorporated</option>
-              </select>
-            </div>
-          </div>
-
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Country of Incorporation</label>
-              <select
-                className={styles.formInput}
-                value={startupCountry}
-                onChange={(e) => setStartupCountry(e.target.value)}
-              >
-                <option>United States</option>
-                <option>United Kingdom</option>
-                <option>Germany</option>
-                <option>Singapore</option>
-                <option>Estonia</option>
-                <option>Romania</option>
-                <option>Other</option>
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Year Founded</label>
-              <input
-                className={styles.formInput}
-                placeholder="2022"
-                type="number"
-                value={startupYearFounded}
-                onChange={(e) => setStartupYearFounded(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Website</label>
-            <input
-              className={styles.formInput}
-              placeholder="https://yourcompany.com"
-              type="url"
-              value={startupWebsite}
-              onChange={(e) => setStartupWebsite(e.target.value)}
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              One-liner: What does your company do?
-            </label>
-            <div className={styles.formHint}>
-              Max 160 characters — this appears on your public profile
-            </div>
-            <input
-              className={styles.formInput}
-              placeholder="We help investors discover verified startups using AI-powered matching."
-              type="text"
-              maxLength={160}
-              value={startupOneLiner}
-              onChange={(e) => setStartupOneLiner(e.target.value)}
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              Company Description{" "}
-              <span style={{ color: "var(--gray-400)", fontWeight: 400 }}>
-                (shown in pop-out profile to investors & experts)
-              </span>
-            </label>
-            <div className={styles.formHint}>
-              3–5 sentences: what problem you solve, how, current traction, and why now.
-            </div>
-            <textarea
-              className={styles.formInput}
-              placeholder="e.g. TechCore builds enterprise-grade AI infrastructure handling 200M+ requests/day. Trusted by 40+ Fortune 500 clients. Raised $1.2M ARR in 18 months with zero paid marketing. Now raising Series A to expand into Europe."
-              style={{ height: 110 }}
-              value={startupDescription}
-              onChange={(e) => setStartupDescription(e.target.value)}
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              Key Metric You're Most Proud Of{" "}
-              <span style={{ color: "var(--gray-400)", fontWeight: 400 }}>
-                (optional — increases investor attention)
-              </span>
-            </label>
-            <input
-              className={styles.formInput}
-              placeholder="e.g. $1.2M ARR · 40+ enterprise clients · 200M requests/day"
-              type="text"
-              value={startupKeyMetric}
-              onChange={(e) => setStartupKeyMetric(e.target.value)}
-            />
-          </div>
-        </div>
+        <StartupStep1 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "startup" && step === 2 && (
+        <StartupStep2 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "startup" && step === 3 && (
+        <StartupStep3 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "startup" && step === 4 && (
+        <StartupStep4 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "startup" && step === 5 && (
+        <StartupStep5 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "startup" && step === 6 && (
+        <StartupStep6 onBack={prevStep} onComplete={completeProfile} />
       )}
 
-        {step >= 1 && step <= 6 && (
+      {/* EXPERT steps 1–6 */}
+      {role === "expert" && step === 1 && (
+        <ExpertStep1 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "expert" && step === 2 && (
+        <ExpertStep2 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "expert" && step === 3 && (
+        <ExpertStep3 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "expert" && step === 4 && (
+        <ExpertStep4 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "expert" && step === 5 && (
+        <ExpertStep5 onBack={prevStep} onNext={nextStep} />
+      )}
+      {role === "expert" && step === 6 && (
+        <ExpertStep6 onBack={prevStep} onComplete={completeProfile} />
+      )}
+
+        {(role === "investor" || role === "startup" || role === "expert") &&
+          step >= 1 &&
+          step <= 6 && (
           <div className={styles.btnRow}>
             <button className={styles.btnBack} onClick={prevStep}>
               ← Back

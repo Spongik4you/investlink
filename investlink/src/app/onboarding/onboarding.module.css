@@ -353,7 +353,34 @@ select.formInput { cursor: pointer; appearance: none; background-image: url("dat
 
 .formRow3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 
-.otherInputWrap {display: none;}
+.otherInputWrap {
+  width: 100%;
+  flex-basis: 100%;
+  margin-top: 4px;
+}
+
+.otherInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1.5px solid var(--blue);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  color: var(--gray-900);
+  box-sizing: border-box;
+}
+
+.otherInput:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.ccOther .ccIcon {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
 
 /* ── CHOICE CHIPS ── */
 .chipGroup { display: flex; flex-wrap: wrap; gap: 8px; }
