@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "@/app/onboarding/onboarding.module.css";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type Props = {
   onBack: () => void;
@@ -104,6 +105,31 @@ export default function ExpertStep2({ onBack, onNext }: Props) {
   const [industries, setIndustries] = useState<string[]>(["🤖 AI / ML", "🏥 BioTech"]);
   const [industriesOther, setIndustriesOther] = useState("");
   const [industriesOtherSel, setIndustriesOtherSel] = useState(false);
+
+  useOnboardingStepSync(
+    "expert",
+    2,
+    () => ({
+      primaryCategory,
+      categoryOther,
+      skills,
+      skillsOther,
+      skillsOtherSel,
+      industries,
+      industriesOther,
+      industriesOtherSel,
+    }),
+    [
+      primaryCategory,
+      categoryOther,
+      skills,
+      skillsOther,
+      skillsOtherSel,
+      industries,
+      industriesOther,
+      industriesOtherSel,
+    ]
+  );
 
   return (
     <div className={[styles.stepForm, styles.active].join(" ")}>

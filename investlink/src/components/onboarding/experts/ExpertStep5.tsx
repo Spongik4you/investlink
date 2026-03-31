@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "@/app/onboarding/onboarding.module.css";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type Props = {
   onBack: () => void;
@@ -66,6 +67,39 @@ export default function ExpertStep5({ onBack, onNext }: Props) {
   const [notice, setNotice] = useState("1–3 days");
   const [noticeOther, setNoticeOther] = useState("");
   const [noticeIsOther, setNoticeIsOther] = useState(false);
+
+  useOnboardingStepSync(
+    "expert",
+    5,
+    () => ({
+      collab,
+      collabOther,
+      collabOtherSel,
+      projects,
+      projectsOther,
+      projectsOtherSel,
+      nda,
+      ndaOther,
+      ndaIsOther,
+      notice,
+      noticeOther,
+      noticeIsOther,
+    }),
+    [
+      collab,
+      collabOther,
+      collabOtherSel,
+      projects,
+      projectsOther,
+      projectsOtherSel,
+      nda,
+      ndaOther,
+      ndaIsOther,
+      notice,
+      noticeOther,
+      noticeIsOther,
+    ]
+  );
 
   return (
     <div className={[styles.stepForm, styles.active].join(" ")}>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "@/app/onboarding/onboarding.module.css";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type Props = {
   onBack: () => void;
@@ -30,6 +31,37 @@ export default function ExpertStep1({ onBack, onNext }: Props) {
   const [linkedIn, setLinkedIn] = useState("");
   const [bio, setBio] = useState("");
   const [brands, setBrands] = useState("");
+
+  useOnboardingStepSync(
+    "expert",
+    1,
+    () => ({
+      firstName,
+      lastName,
+      title,
+      country,
+      yearsExp,
+      education,
+      educationOther,
+      educationIsOther,
+      linkedIn,
+      bio,
+      brands,
+    }),
+    [
+      firstName,
+      lastName,
+      title,
+      country,
+      yearsExp,
+      education,
+      educationOther,
+      educationIsOther,
+      linkedIn,
+      bio,
+      brands,
+    ]
+  );
 
   return (
     <div className={[styles.stepForm, styles.active].join(" ")}>

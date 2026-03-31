@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "@/app/onboarding/onboarding.module.css";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type Props = {
   onBack: () => void;
@@ -76,6 +77,25 @@ export default function InvestorStep4({ onBack, onNext }: Props) {
       desc: "Max growth potential",
     },
   ];
+
+  useOnboardingStepSync(
+    "investor",
+    4,
+    () => ({
+      ticketSize,
+      otherTicket,
+      investmentFrequency,
+      otherFrequency,
+      riskTolerance,
+    }),
+    [
+      ticketSize,
+      otherTicket,
+      investmentFrequency,
+      otherFrequency,
+      riskTolerance,
+    ]
+  );
 
   return (
     <div className={[styles.stepForm, styles.active].join(" ")}>

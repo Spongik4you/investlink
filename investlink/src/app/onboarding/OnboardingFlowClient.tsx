@@ -29,7 +29,9 @@ import ExpertStep4 from "@/components/onboarding/experts/ExpertStep4";
 import ExpertStep5 from "@/components/onboarding/experts/ExpertStep5";
 import ExpertStep6 from "@/components/onboarding/experts/ExpertStep6";
 
-type RoleKey = "investor" | "startup" | "expert";
+import { useOnboardingWizard, type WizardRoleKey } from "@/contexts/OnboardingWizardContext";
+
+type RoleKey = WizardRoleKey;
 
 const ROLES = {
   investor: {
@@ -81,9 +83,12 @@ const ROLES = {
 
 export default function OnboardingFlowClient() {
   const router = useRouter();
+  const { getSnapshot } = useOnboardingWizard();
 
   const [role, setRole] = useState<RoleKey>("investor");
   const [step, setStep] = useState<number>(0); // 0 = role picker, 1..6 = steps, 999 = success
+  const [submitting, setSubmitting] = useState(false);
+  const [completeError, setCompleteError] = useState<string | null>(null);
   const cfg = ROLES[role];
 
 
@@ -120,13 +125,55 @@ export default function OnboardingFlowClient() {
 
   async function continueFromRolePicker() {
     await persistRoleIfNeeded();
+    router.refresh();
     nextStep();
   }
 
+  function dashboardPathForRole(r: RoleKey) {
+    if (r === "investor") return "/dashboard/investor";
+    if (r === "startup") return "/dashboard/startup";
+    return "/dashboard/expert";
+  }
+
   async function completeProfile() {
-    // aici (mai târziu) salvezi și toate câmpurile pe profil + onboardingStatus=COMPLETED
-    // goDashboard()
-    setStep(999);
+    try {
+      setSubmitting(true);
+      setCompleteError(null);
+  
+      const steps = getSnapshot(role);
+  
+      console.log("ROLE:", role);
+      console.log("STEPS FOR ROLE:", steps);
+  
+      const res = await fetch("/api/onboarding/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          role: role.toUpperCase(),
+          investorType: role === "investor" ? investorType : undefined,
+          payload: { steps },
+        }),
+      });
+  
+      const data = await res.json().catch(() => null);
+  
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to complete onboarding.");
+      }
+  
+      router.refresh();
+      if (role === "investor") router.push("/dashboard/investor");
+      if (role === "startup") router.push("/dashboard/startup");
+      if (role === "expert") router.push("/dashboard/expert");
+    } catch (err) {
+      setCompleteError(
+        err instanceof Error ? err.message : "Something went wrong."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function goDashboard() {
@@ -135,8 +182,6 @@ export default function OnboardingFlowClient() {
     if (role === "startup") router.push("/dashboard/startup");
     if (role === "expert") router.push("/dashboard/expert");
   }
-
-
 
 
 return (
@@ -292,23 +337,47 @@ return (
           step >= 1 &&
           step <= 6 && (
           <div className={styles.btnRow}>
-            <button className={styles.btnBack} onClick={prevStep}>
+            <button
+              className={styles.btnBack}
+              onClick={prevStep}
+              disabled={submitting}
+              type="button"
+            >
               ← Back
             </button>
 
             {step < 6 ? (
-              <button className={styles.btnNext} onClick={nextStep}>
+              <button
+                className={styles.btnNext}
+                onClick={nextStep}
+                disabled={submitting}
+                type="button"
+              >
                 Continue →
               </button>
             ) : (
-              <button className={styles.btnNext} onClick={completeProfile}>
-                Complete Profile →
+              <button
+                className={styles.btnNext}
+                onClick={() => void completeProfile()}
+                disabled={submitting}
+                type="button"
+              >
+                {submitting ? "Saving…" : "Complete Profile →"}
               </button>
             )}
           </div>
         )}
 
-        {step === 999 && (
+        {completeError && step >= 1 && step <= 6 && (
+          <div
+            className={styles.formGroup}
+            style={{ color: "var(--red)", fontSize: 13, marginTop: -8 }}
+          >
+            {completeError}
+          </div>
+        )}
+
+        {/* {step === 999 && (
           <div className={[styles.successWrap, styles.active].join(" ")}>
             <div className={styles.successIcon}>✅</div>
             <div className={styles.successTitle}>Profile Complete!</div>
@@ -320,7 +389,7 @@ return (
               Go to My Dashboard →
             </button>
           </div>
-        )}
+        )} */}
       </>
     }
   />

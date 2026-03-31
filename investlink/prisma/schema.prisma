@@ -37,6 +37,9 @@ model User {
   verificationStatus VerificationStatus @default(UNVERIFIED)
   onboardingStatus   OnboardingStatus   @default(NOT_STARTED)
 
+  /// Full wizard answers (JSON) for analytics, debugging, and future remapping
+  onboardingPayload Json?
+
   emailVerified DateTime?
   accounts      Account[]
   sessions      Session[]
@@ -50,44 +53,170 @@ model User {
 }
 
 model ExpertProfile {
-  id                     String   @id @default(cuid())
-  userId                 String   @unique
-  headline               String?
-  yearsExperience        Int?
-  areasOfExpertise       String[]
+  id     String @id @default(cuid())
+  userId String @unique
+
+  /// identity / public profile
+  firstName    String?
+  lastName     String?
+  title        String?
+  headline     String?
+  bio          String?
+  country      String?
+  city         String?
+  linkedinUrl  String?
+  website      String?
+  portfolioUrl String?
+
+  /// filtering / matching
+  yearsExperience  Int?
+  primaryCategory  String?
+  skills           String[]
+  industries       String[]
+  areasOfExpertise String[]
+
+  /// commercial / availability
+  hourlyRateUsd       Int?
+  minProjectBudgetUsd Int?
+  availability        String?
+  noticePeriod        String?
+
+  /// collaboration
+  collaborationTypes     String[]
+  preferredStartupStages String[]
   collaborationInterests String[]
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+
+  /// credibility
+  pastClients    String?
+  certifications String[]
+  extras         Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([primaryCategory])
+  @@index([yearsExperience])
+  @@index([country])
+  @@index([city])
 }
 
 model InvestorProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  investorType    String?
-  budgetRange     String?
-  riskAppetite    String?
-  investmentFocus String[]
-  strategicNotes  String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id     String @id @default(cuid())
+  userId String @unique
+
+  /// identity / public profile
+  firstName         String?
+  lastName          String?
+  country           String?
+  city              String?
+  professionalTitle String?
+  linkedinUrl       String?
+  bio               String?
+
+  /// investor classification
+  investorType      String?
+  investorTypeOther String?
+
+  /// filtering / matching
+  sectors     String[]
+  stages      String[]
+  geographies String[]
+
+  /// capital profile
+  budgetMinUsd        Int?
+  budgetMaxUsd        Int?
+  ticketMinUsd        Int?
+  ticketMaxUsd        Int?
+  riskAppetite        String?
+  investmentFrequency String?
+
+  /// preferences
+  preferredStartupValues String[]
+  involvementTypes       String[]
+  coInvestingPreference  String?
+  hearAboutSource        String?
+
+  /// background / trust signals
+  previousInvestments String?
+  successfulExits     String?
+
+  /// flexible storage
+  strategicNotes Json?
+  extras         Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([investorType])
+  @@index([riskAppetite])
+  @@index([country])
+  @@index([city])
 }
 
 model StartupProfile {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  companyName  String?
-  companyStage String?
-  website      String?
-  shortPitch   String?
-  fundingGoal  String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id     String @id @default(cuid())
+  userId String @unique
+
+  /// identity / public profile
+  companyName     String?
+  legalEntityType String?
+  country         String?
+  city            String?
+  website         String?
+  linkedinUrl     String?
+
+  /// company summary
+  oneLiner   String?
+  shortPitch String?
+  problem    String?
+  solution   String?
+
+  /// classification / filtering
+  industries     String[]
+  businessModels String[]
+  companyStage   String?
+  fundingStage   String?
+  foundedYear    Int?
+
+  /// fundraising
+  fundraisingGoalUsd Int?
+  minCheckUsd        Int?
+  maxCheckUsd        Int?
+  useOfFunds         String[]
+
+  /// traction / team
+  founderCount      Int?
+  teamSize          Int?
+  tractionSummary   String?
+  monthlyRevenueUsd Int?
+  monthlyGrowthRate Float?
+  usersCount        Int?
+
+  /// needs / matching
+  expertNeeds   String[]
+  hiringNeeds   String[]
+  startupValues String[]
+
+  /// assets
+  deckUrl       String?
+  pitchVideoUrl String?
+
+  /// flexible storage
+  extras Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyStage])
+  @@index([fundingStage])
+  @@index([country])
+  @@index([city])
 }
 
 model Account {

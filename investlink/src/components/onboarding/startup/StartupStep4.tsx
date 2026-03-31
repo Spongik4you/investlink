@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "@/app/onboarding/onboarding.module.css";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type Props = {
   onBack: () => void;
@@ -65,6 +66,37 @@ export default function StartupStep4({ onBack, onNext }: Props) {
   const [prevFunding, setPrevFunding] = useState("Bootstrapped");
   const [prevFundingOther, setPrevFundingOther] = useState("");
   const [prevFundingIsOther, setPrevFundingIsOther] = useState(false);
+
+  useOnboardingStepSync(
+    "startup",
+    4,
+    () => ({
+      founderCount,
+      teamSize,
+      founderBg,
+      founderBgOther,
+      founderBgOtherSel,
+      traction,
+      tractionOther,
+      tractionOtherSel,
+      prevFunding,
+      prevFundingOther,
+      prevFundingIsOther,
+    }),
+    [
+      founderCount,
+      teamSize,
+      founderBg,
+      founderBgOther,
+      founderBgOtherSel,
+      traction,
+      tractionOther,
+      tractionOtherSel,
+      prevFunding,
+      prevFundingOther,
+      prevFundingIsOther,
+    ]
+  );
 
   return (
     <div className={[styles.stepForm, styles.active].join(" ")}>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "@/app/onboarding/onboarding.module.css";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type Props = {
   onBack: () => void;
@@ -34,6 +35,13 @@ export default function InvestorStep6({ onBack, onComplete }: Props) {
       [key]: !prev[key],
     }));
   };
+
+  useOnboardingStepSync(
+    "investor",
+    6,
+    () => ({ toggles, channels }),
+    [toggles, channels]
+  );
 
   return (
     <div className={[styles.stepForm, styles.active].join(" ")}>

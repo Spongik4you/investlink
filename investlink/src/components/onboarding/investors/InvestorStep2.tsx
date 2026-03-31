@@ -2,6 +2,7 @@
 
 import styles from "@/app/onboarding/onboarding.module.css";
 import { useState } from "react";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type InvestorType =
   | "angel"
@@ -65,6 +66,13 @@ export default function InvestorStep2({
   onNext,
 }: Props) {
   const [otherInvestorType, setOtherInvestorType] = useState("");
+
+  useOnboardingStepSync(
+    "investor",
+    2,
+    () => ({ investorType, otherInvestorType }),
+    [investorType, otherInvestorType]
+  );
 
   return (
     <div className={[styles.stepForm, styles.active].join(" ")}>

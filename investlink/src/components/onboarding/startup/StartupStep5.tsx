@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "@/app/onboarding/onboarding.module.css";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type Props = {
   onBack: () => void;
@@ -89,6 +90,31 @@ export default function StartupStep5({ onBack, onNext }: Props) {
   const [budget, setBudget] = useState("Under $1,000 / mo");
   const [budgetOther, setBudgetOther] = useState("");
   const [budgetIsOther, setBudgetIsOther] = useState(false);
+
+  useOnboardingStepSync(
+    "startup",
+    5,
+    () => ({
+      categories,
+      categoriesOther,
+      categoriesOtherSel,
+      engagement,
+      engageOther,
+      budget,
+      budgetOther,
+      budgetIsOther,
+    }),
+    [
+      categories,
+      categoriesOther,
+      categoriesOtherSel,
+      engagement,
+      engageOther,
+      budget,
+      budgetOther,
+      budgetIsOther,
+    ]
+  );
 
   return (
     <div className={[styles.stepForm, styles.active].join(" ")}>

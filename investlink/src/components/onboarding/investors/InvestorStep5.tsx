@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "@/app/onboarding/onboarding.module.css";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type Props = {
   onBack: () => void;
@@ -19,6 +20,8 @@ export default function InvestorStep5({ onBack, onNext }: Props) {
 
   const [coInvesting, setCoInvesting] = useState("");
   const [otherCoInvesting, setOtherCoInvesting] = useState("");
+
+  const [hearAbout, setHearAbout] = useState("");
 
   const startupValueOptions = [
     "Strong founding team",
@@ -54,6 +57,29 @@ export default function InvestorStep5({ onBack, onNext }: Props) {
       return [...prev, value];
     });
   };
+
+  useOnboardingStepSync(
+    "investor",
+    5,
+    () => ({
+      startupValues,
+      otherValue,
+      boardPreference,
+      otherBoard,
+      coInvesting,
+      otherCoInvesting,
+      hearAbout,
+    }),
+    [
+      startupValues,
+      otherValue,
+      boardPreference,
+      otherBoard,
+      coInvesting,
+      otherCoInvesting,
+      hearAbout,
+    ]
+  );
 
   return (
     <div className={[styles.stepForm, styles.active].join(" ")}>
@@ -236,7 +262,11 @@ export default function InvestorStep5({ onBack, onNext }: Props) {
           How did you hear about InvestLink?
         </label>
 
-        <select className={styles.formInput} defaultValue="">
+        <select
+          className={styles.formInput}
+          value={hearAbout}
+          onChange={(e) => setHearAbout(e.target.value)}
+        >
           <option value="">Select…</option>
           <option>LinkedIn / Social Media</option>
           <option>Friend or Colleague referral</option>

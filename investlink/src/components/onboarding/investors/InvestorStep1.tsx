@@ -2,6 +2,7 @@
 
 import styles from "@/app/onboarding/onboarding.module.css";
 import { useState } from "react";
+import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
 
 type Props = {
   onBack: () => void;
@@ -9,11 +10,50 @@ type Props = {
 };
 
 export default function InvestorStep1({ onBack, onNext }: Props) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [professionalTitle, setProfessionalTitle] = useState("");
+  const [linkedIn, setLinkedIn] = useState("");
+  const [bio, setBio] = useState("");
+
   const [prevInvestments, setPrevInvestments] = useState("1–5 investments");
   const [prevInvestmentsOther, setPrevInvestmentsOther] = useState("");
 
   const [successfulExits, setSuccessfulExits] = useState("1–2 exits");
   const [successfulExitsOther, setSuccessfulExitsOther] = useState("");
+
+  useOnboardingStepSync(
+    "investor",
+    1,
+    () => ({
+      firstName,
+      lastName,
+      country,
+      city,
+      professionalTitle,
+      linkedIn,
+      bio,
+      prevInvestments,
+      prevInvestmentsOther,
+      successfulExits,
+      successfulExitsOther,
+    }),
+    [
+      firstName,
+      lastName,
+      country,
+      city,
+      professionalTitle,
+      linkedIn,
+      bio,
+      prevInvestments,
+      prevInvestmentsOther,
+      successfulExits,
+      successfulExitsOther,
+    ]
+  );
 
   const prevInvestmentOptions = [
     "First investment",
@@ -47,19 +87,31 @@ export default function InvestorStep1({ onBack, onNext }: Props) {
             className={styles.formInput}
             placeholder="Alexander"
             type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
           />
         </div>
 
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Last Name</label>
-          <input className={styles.formInput} placeholder="Wright" type="text" />
+          <input
+            className={styles.formInput}
+            placeholder="Wright"
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
         </div>
       </div>
 
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Country of Residence</label>
-          <select className={styles.formInput} defaultValue="">
+          <select
+            className={styles.formInput}
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+          >
             <option value="">Select country…</option>
             <option>United States</option>
             <option>United Kingdom</option>
@@ -73,7 +125,13 @@ export default function InvestorStep1({ onBack, onNext }: Props) {
 
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>City</label>
-          <input className={styles.formInput} placeholder="New York" type="text" />
+          <input
+            className={styles.formInput}
+            placeholder="New York"
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
         </div>
       </div>
 
@@ -83,6 +141,8 @@ export default function InvestorStep1({ onBack, onNext }: Props) {
           className={styles.formInput}
           placeholder="e.g. Angel Investor, Fund Manager, Family Office"
           type="text"
+          value={professionalTitle}
+          onChange={(e) => setProfessionalTitle(e.target.value)}
         />
       </div>
 
@@ -97,6 +157,8 @@ export default function InvestorStep1({ onBack, onNext }: Props) {
           className={styles.formInput}
           placeholder="linkedin.com/in/your-profile"
           type="text"
+          value={linkedIn}
+          onChange={(e) => setLinkedIn(e.target.value)}
         />
       </div>
 
@@ -117,6 +179,8 @@ export default function InvestorStep1({ onBack, onNext }: Props) {
           className={styles.formInput}
           placeholder="e.g. Angel investor with 3 successful exits in CleanTech and FinTech. Previously VP at Goldman Sachs. I write $50K–$200K checks at Seed stage and bring hands-on operational support and warm intros to European corporates."
           style={{ height: 100 }}
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
         />
       </div>
 
