@@ -176,7 +176,7 @@ export default function StartupStep2({ onBack, onNext }: Props) {
             );
           })}
 
-          <div
+          {/* <div
             className={[
               styles.cardChoice,
               styles.ccOther,
@@ -198,9 +198,9 @@ export default function StartupStep2({ onBack, onNext }: Props) {
             <div className={styles.ccCheck}>
               {fundingStage === "other" ? "✓" : ""}
             </div>
-          </div>
+          </div> */}
 
-          {fundingStage === "other" && (
+          {/* {fundingStage === "other" && (
             <div
               className={styles.otherInputWrap}
               style={{ gridColumn: "1 / -1" }}
@@ -213,7 +213,7 @@ export default function StartupStep2({ onBack, onNext }: Props) {
                 onChange={(e) => setStageOther(e.target.value)}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import styles from "@/app/onboarding/onboarding.module.css";
 import { useState } from "react";
 import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
+import { COUNTRIES } from "@/lib/countries";
 
 type Props = {
   onBack: () => void;
@@ -112,15 +113,25 @@ export default function InvestorStep1({ onBack, onNext }: Props) {
             value={country}
             onChange={(e) => setCountry(e.target.value)}
           >
-            <option value="">Select country…</option>
-            <option>United States</option>
-            <option>United Kingdom</option>
-            <option>Germany</option>
-            <option>Singapore</option>
-            <option>UAE</option>
-            <option>Romania</option>
-            <option>Other</option>
-          </select>
+          <option value="">Select country…</option>
+
+          <optgroup label="Popular">
+            <option value="United States">United States</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Germany">Germany</option>
+            <option value="Singapore">Singapore</option>
+            <option value="Romania">Romania</option>
+            <option value="Moldova">Moldova</option>
+          </optgroup>
+
+          <optgroup label="All countries">
+            {COUNTRIES.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </optgroup>
+        </select>
         </div>
 
         <div className={styles.formGroup}>

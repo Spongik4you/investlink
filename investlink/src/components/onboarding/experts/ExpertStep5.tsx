@@ -228,7 +228,7 @@ export default function ExpertStep5({ onBack, onNext }: Props) {
               </div>
             );
           })}
-          <div
+          {/* <div
             className={[styles.chip, ndaIsOther ? styles.selected : ""]
               .filter(Boolean)
               .join(" ")}
@@ -237,7 +237,7 @@ export default function ExpertStep5({ onBack, onNext }: Props) {
             tabIndex={0}
           >
             ✏️ Other
-          </div>
+          </div> */}
           {ndaIsOther && (
             <div className={styles.otherInputWrap}>
               <input

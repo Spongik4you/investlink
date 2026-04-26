@@ -149,6 +149,8 @@ model InvestorProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  investments InvestmentPosition[]
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([investorType])
@@ -208,6 +210,10 @@ model StartupProfile {
   /// flexible storage
   extras Json?
 
+  fundingRounds        StartupFundingRound[]
+  investorRelations    StartupInvestorRelation[]
+  expertCollaborations StartupExpertCollaboration[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -253,4 +259,179 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+enum InvestmentPositionStatus {
+  ACTIVE
+  WATCHLIST
+  EXITED
+}
+
+enum StartupStage {
+  PRE_SEED
+  SEED
+  SERIES_A
+  SERIES_B
+  SERIES_C
+}
+
+model StartupCompany {
+  id      String        @id @default(cuid())
+  name    String
+  slug    String        @unique
+  sector  String?
+  stage   StartupStage?
+  logoUrl String?
+  country String?
+
+  positions InvestmentPosition[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InvestmentPosition {
+  id                String @id @default(cuid())
+  investorProfileId String
+  startupCompanyId  String
+
+  investedAmount Decimal  @db.Decimal(18, 2)
+  currentValue   Decimal  @db.Decimal(18, 2)
+  equityPercent  Decimal? @db.Decimal(8, 4)
+
+  positionStatus InvestmentPositionStatus @default(ACTIVE)
+  isActive       Boolean                  @default(true)
+
+  // 0-100, îl folosim provizoriu pentru risk analysis
+  riskScore Int @default(30)
+
+  openedAt DateTime  @default(now())
+  closedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  investorProfile InvestorProfile @relation(fields: [investorProfileId], references: [id], onDelete: Cascade)
+  startupCompany  StartupCompany  @relation(fields: [startupCompanyId], references: [id], onDelete: Cascade)
+
+  @@index([investorProfileId, isActive])
+  @@index([startupCompanyId])
+}
+
+// model Notification {
+//   id        String   @id @default(cuid())
+//   userId    String
+//   title     String
+//   body      String?
+//   isRead    Boolean  @default(false)
+//   createdAt DateTime @default(now())
+
+//   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   @@index([userId, isRead])
+// }
+enum FundingRoundStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum InvestmentStatus {
+  PENDING
+  ACTIVE
+  DECLINED
+  COMPLETED
+}
+
+enum InvestorRelationStatus {
+  PIPELINE
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum ExpertCollaborationStatus {
+  ACTIVE
+  BUSY
+  COMPLETED
+  PAUSED
+  CANCELLED
+}
+
+model StartupFundingRound {
+  id                   String             @id @default(cuid())
+  startupProfileId     String
+  title                String
+  targetAmount         Decimal            @db.Decimal(14, 2)
+  raisedAmount         Decimal            @default(0) @db.Decimal(14, 2)
+  equityOfferedPercent Decimal?           @db.Decimal(5, 2)
+  status               FundingRoundStatus @default(DRAFT)
+  openedAt             DateTime?
+  closedAt             DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  startupProfile StartupProfile      @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
+  investments    StartupInvestment[]
+
+  @@index([startupProfileId])
+}
+
+model StartupInvestorRelation {
+  id               String                 @id @default(cuid())
+  startupProfileId String
+  displayName      String
+  organizationName String?
+  status           InvestorRelationStatus @default(PIPELINE)
+  email            String?
+  totalCommitted   Decimal                @default(0) @db.Decimal(14, 2)
+  equityPercent    Decimal?               @db.Decimal(5, 2)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  startupProfile StartupProfile      @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
+  investments    StartupInvestment[]
+
+  @@index([startupProfileId])
+}
+
+model StartupInvestment {
+  id                        String           @id @default(cuid())
+  startupFundingRoundId     String
+  startupInvestorRelationId String
+  amount                    Decimal          @db.Decimal(14, 2)
+  equityPercent             Decimal?         @db.Decimal(5, 2)
+  status                    InvestmentStatus @default(PENDING)
+  investedAt                DateTime?
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime         @updatedAt
+
+  fundingRound     StartupFundingRound     @relation(fields: [startupFundingRoundId], references: [id], onDelete: Cascade)
+  investorRelation StartupInvestorRelation @relation(fields: [startupInvestorRelationId], references: [id], onDelete: Cascade)
+
+  @@index([startupFundingRoundId])
+  @@index([startupInvestorRelationId])
+}
+
+model StartupExpertCollaboration {
+  id                  String                    @id @default(cuid())
+  startupProfileId    String
+  displayName         String
+  roleTitle           String
+  status              ExpertCollaborationStatus @default(ACTIVE)
+  hourlyRate          Decimal?                  @db.Decimal(10, 2)
+  totalPaid           Decimal                   @default(0) @db.Decimal(14, 2)
+  workloadPercent     Int?
+  rating              Decimal?                  @db.Decimal(3, 2)
+  projectsCount       Int                       @default(1)
+  currentProjectTitle String?
+  startedAt           DateTime?
+  endedAt             DateTime?
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+
+  startupProfile StartupProfile @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
+
+  @@index([startupProfileId])
 }

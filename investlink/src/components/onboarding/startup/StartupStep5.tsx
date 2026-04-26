@@ -274,7 +274,7 @@ export default function StartupStep5({ onBack, onNext }: Props) {
               </div>
             );
           })}
-          <div
+          {/* <div
             className={[styles.chip, budgetIsOther ? styles.selected : ""]
               .filter(Boolean)
               .join(" ")}
@@ -283,7 +283,7 @@ export default function StartupStep5({ onBack, onNext }: Props) {
             tabIndex={0}
           >
             ✏️ Other
-          </div>
+          </div> */}
           {budgetIsOther && (
             <div className={styles.otherInputWrap}>
               <input

@@ -172,7 +172,7 @@ export default function InvestorStep5({ onBack, onNext }: Props) {
             </div>
           ))}
 
-          <div
+          {/* <div
             className={[
               styles.chip,
               boardPreference === "other" ? styles.selected : "",
@@ -184,9 +184,9 @@ export default function InvestorStep5({ onBack, onNext }: Props) {
             tabIndex={0}
           >
             ✏️ Other
-          </div>
+          </div> */}
 
-          {boardPreference === "other" && (
+          {/* {boardPreference === "other" && (
             <div
               className={styles.otherInputWrap}
               style={{ display: "block" }}
@@ -199,7 +199,7 @@ export default function InvestorStep5({ onBack, onNext }: Props) {
                 onChange={(e) => setOtherBoard(e.target.value)}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
@@ -226,7 +226,7 @@ export default function InvestorStep5({ onBack, onNext }: Props) {
             </div>
           ))}
 
-          <div
+          {/* <div
             className={[
               styles.chip,
               coInvesting === "other" ? styles.selected : "",
@@ -238,9 +238,9 @@ export default function InvestorStep5({ onBack, onNext }: Props) {
             tabIndex={0}
           >
             ✏️ Other
-          </div>
+          </div> */}
 
-          {coInvesting === "other" && (
+          {/* {coInvesting === "other" && (
             <div
               className={styles.otherInputWrap}
               style={{ display: "block" }}
@@ -253,7 +253,7 @@ export default function InvestorStep5({ onBack, onNext }: Props) {
                 onChange={(e) => setOtherCoInvesting(e.target.value)}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
 

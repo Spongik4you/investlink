@@ -170,7 +170,7 @@ export default function InvestorStep3({ onBack, onNext }: Props) {
             </div>
           ))}
 
-          <div
+          {/* <div
             className={[
               styles.chip,
               stages.includes("other") ? styles.selected : "",
@@ -182,9 +182,9 @@ export default function InvestorStep3({ onBack, onNext }: Props) {
             tabIndex={0}
           >
             ✏️ Other
-          </div>
+          </div> */}
 
-          {stages.includes("other") && (
+          {/* {stages.includes("other") && (
             <div
               className={styles.otherInputWrap}
               style={{ display: "block" }}
@@ -197,7 +197,7 @@ export default function InvestorStep3({ onBack, onNext }: Props) {
                 onChange={(e) => setOtherStage(e.target.value)}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
@@ -222,7 +222,7 @@ export default function InvestorStep3({ onBack, onNext }: Props) {
             </div>
           ))}
 
-          <div
+          {/* <div
             className={[
               styles.chip,
               geographies.includes("other") ? styles.selected : "",
@@ -234,9 +234,9 @@ export default function InvestorStep3({ onBack, onNext }: Props) {
             tabIndex={0}
           >
             ✏️ Other region
-          </div>
+          </div> */}
 
-          {geographies.includes("other") && (
+          {/* {geographies.includes("other") && (
             <div
               className={styles.otherInputWrap}
               style={{ display: "block" }}
@@ -249,7 +249,7 @@ export default function InvestorStep3({ onBack, onNext }: Props) {
                 onChange={(e) => setOtherGeo(e.target.value)}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

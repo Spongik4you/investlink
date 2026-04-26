@@ -165,7 +165,7 @@ export default function ExpertStep3({ onBack, onNext }: Props) {
             role="button"
             tabIndex={0}
           >
-            ✏️ Other
+            ✏️ Price per hour
           </div>
           {rateIsOther && (
             <div className={styles.otherInputWrap}>
@@ -269,7 +269,7 @@ export default function ExpertStep3({ onBack, onNext }: Props) {
               </div>
             );
           })}
-          <div
+          {/* <div
             className={[styles.chip, equityIsOther ? styles.selected : ""]
               .filter(Boolean)
               .join(" ")}
@@ -278,7 +278,7 @@ export default function ExpertStep3({ onBack, onNext }: Props) {
             tabIndex={0}
           >
             ✏️ Other
-          </div>
+          </div> */}
           {equityIsOther && (
             <div className={styles.otherInputWrap}>
               <input
@@ -314,7 +314,7 @@ export default function ExpertStep3({ onBack, onNext }: Props) {
               </div>
             );
           })}
-          <div
+          {/* <div
             className={[styles.chip, stageOtherSel ? styles.selected : ""]
               .filter(Boolean)
               .join(" ")}
@@ -326,7 +326,7 @@ export default function ExpertStep3({ onBack, onNext }: Props) {
             tabIndex={0}
           >
             ✏️ Other
-          </div>
+          </div> */}
           {stageOtherSel && (
             <div className={styles.otherInputWrap}>
               <input
