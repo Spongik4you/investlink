@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { getStartupNavData } from "@/lib/dashboard/get-startup-nav-data";
@@ -14,7 +13,9 @@ export default async function StartupLayout({
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
-    redirect("/auth/signin");
+    throw new Error(
+      "StartupLayout: sesiune lipsă deși middleware ar fi trebuit să blocheze accesul.",
+    );
   }
 
   const navData = await getStartupNavData(session.user.email);

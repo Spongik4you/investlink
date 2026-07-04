@@ -3,6 +3,7 @@
 import styles from "./onboarding.module.css";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 import OnboardingShell from "@/components/onboarding/OnboardingShell";
 import LeftPanel from "@/components/onboarding/LeftPanel";
@@ -83,6 +84,7 @@ const ROLES = {
 
 export default function OnboardingFlowClient() {
   const router = useRouter();
+  const { update } = useSession();
   const { getSnapshot } = useOnboardingWizard();
 
   const [role, setRole] = useState<RoleKey>("investor");
@@ -142,9 +144,6 @@ export default function OnboardingFlowClient() {
   
       const steps = getSnapshot(role);
   
-      console.log("ROLE:", role);
-      console.log("STEPS FOR ROLE:", steps);
-  
       const res = await fetch("/api/onboarding/complete", {
         method: "POST",
         headers: {
@@ -162,6 +161,8 @@ export default function OnboardingFlowClient() {
       if (!res.ok) {
         throw new Error(data?.error || "Failed to complete onboarding.");
       }
+
+      await update();
   
       router.refresh();
       if (role === "investor") router.push("/dashboard/investor");

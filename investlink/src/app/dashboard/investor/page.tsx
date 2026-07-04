@@ -1,5 +1,4 @@
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { getInvestorOverviewByEmail } from "@/lib/dashboard/get-investor-overview";
@@ -9,7 +8,9 @@ export default async function InvestorDashboardPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
-    redirect("/auth/signin");
+    throw new Error(
+      "InvestorDashboardPage: sesiune lipsă deși middleware ar fi trebuit să blocheze accesul.",
+    );
   }
 
   const overview = await getInvestorOverviewByEmail(session.user.email);

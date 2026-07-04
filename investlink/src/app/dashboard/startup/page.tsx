@@ -1,30 +1,20 @@
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
+
 
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+
 import { getStartupDashboardData } from "@/features/dashboard/startup/server/get-startup-dashboard";
 
 export default async function StartupDashboardPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
-    redirect("/auth/signin");
+    throw new Error(
+      "StartupDashboardPage: sesiune lipsă deși middleware ar fi trebuit să blocheze accesul.",
+    );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: {
-      email: true,
-      type: true,
-    },
-  });
-
-  if (!user || user.type !== "STARTUP") {
-    redirect("/dashboard");
-  }
-
-  const data = await getStartupDashboardData(user.email);
+  const data = await getStartupDashboardData(session.user.email);
 
   return (
     <div className="space-y-6">

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { getInvestorNavData } from "@/lib/dashboard/get-investor-nav-data";
@@ -14,7 +13,9 @@ export default async function InvestorLayout({
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
-    redirect("/auth/signin");
+    throw new Error(
+      "InvestorLayout: sesiune lipsă deși middleware ar fi trebuit să blocheze accesul.",
+    );
   }
 
   const navData = await getInvestorNavData(session.user.email);

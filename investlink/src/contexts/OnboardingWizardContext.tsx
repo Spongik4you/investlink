@@ -48,8 +48,7 @@ export function OnboardingWizardProvider({
   );
 
   const getSnapshot = useCallback((role: WizardRoleKey) => {
-    console.log("getSnapshot returning:", storeRef.current);
-    return { ...storeRef.current[role] }; 
+    return { ...storeRef.current[role] };
   }, []);
 
   const value = useMemo(
@@ -83,7 +82,6 @@ export function useOnboardingStepSync(
 
   useEffect(() => {
     const data = build();
-    console.log("setStepData called:", { role, step, data });
     setStepData(role, step, data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role, step, setStepData, ...deps]);

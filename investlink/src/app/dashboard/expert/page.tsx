@@ -1,8 +1,6 @@
 import { RoleDashboard } from "@/components/onboarding/RoleDashboard";
-import { requireDashboardAccess } from "@/lib/guards";
-
-export default async function ExpertDashboardPage() {
-  await requireDashboardAccess("EXPERT");
-
+// Autorizarea (sesiune + rol EXPERT + onboarding complet) e verificată
+// deja de middleware.ts pentru orice rută /dashboard/expert/*.
+export default function ExpertDashboardPage() {
   return <RoleDashboard roleLabel="Expert" />;
 }

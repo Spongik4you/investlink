@@ -106,30 +106,5 @@ export async function POST(req: Request) {
       });
     }
   });
-  console.log("COMPLETE route hit");
-  console.log("session user:", session?.user);
-  console.log("dbUser:", dbUser);
-  console.log("role from body:", role);
-  console.log("steps keys:", Object.keys(payload?.steps ?? {}));
-  const beforeUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      investorProfile: true,
-      startupProfile: true,
-      expertProfile: true,
-    },
-  });
-  console.log("BEFORE:", beforeUser);
-
-  const updatedUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      investorProfile: true,
-      startupProfile: true,
-      expertProfile: true,
-    },
-  });
-  
-  console.log("updatedUser after complete:", updatedUser);
   return NextResponse.json({ ok: true });
 }
