@@ -1,7 +1,6 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -96,6 +95,9 @@ model ExpertProfile {
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  receivedInvitations CollaborationInvitation[]
+  collaborations      StartupExpertCollaboration[]
 
   @@index([primaryCategory])
   @@index([yearsExperience])
@@ -214,6 +216,7 @@ model StartupProfile {
   fundingRounds        StartupFundingRound[]
   investorRelations    StartupInvestorRelation[]
   expertCollaborations StartupExpertCollaboration[]
+  sentInvitations      CollaborationInvitation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -418,6 +421,10 @@ model StartupInvestment {
 model StartupExpertCollaboration {
   id                  String                    @id @default(cuid())
   startupProfileId    String
+  /// FK opțional: setat când colaborarea provine dintr-o invitație acceptată
+  /// pe platformă. Rămâne null pentru colaborări cu experți externi introduse
+  /// manual (doar displayName). Astfel modelul suportă ambele cazuri.
+  expertProfileId     String?
   displayName         String
   roleTitle           String
   status              ExpertCollaborationStatus @default(ACTIVE)
@@ -433,6 +440,36 @@ model StartupExpertCollaboration {
   updatedAt           DateTime                  @updatedAt
 
   startupProfile StartupProfile @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
+  expertProfile  ExpertProfile? @relation(fields: [expertProfileId], references: [id], onDelete: SetNull)
 
   @@index([startupProfileId])
+  @@index([expertProfileId])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+}
+
+model CollaborationInvitation {
+  id               String           @id @default(cuid())
+  startupProfileId String
+  expertProfileId  String
+  roleTitle        String
+  message          String?
+  status           InvitationStatus @default(PENDING)
+  respondedAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  startupProfile StartupProfile @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
+  expertProfile  ExpertProfile  @relation(fields: [expertProfileId], references: [id], onDelete: Cascade)
+
+  /// Un startup nu poate avea două invitații PENDING active către același
+  /// expert simultan. Vezi nota din migrare despre limita acestui unique.
+  @@unique([startupProfileId, expertProfileId, status])
+  @@index([expertProfileId, status])
+  @@index([startupProfileId, status])
 }
