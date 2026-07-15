@@ -1,4 +1,5 @@
 import type { StartupCollaborationItem } from "@/lib/dashboard/get-startup-collaborations";
+import { EndCollaborationButton } from "@/components/dashboard/shared/EndCollaborationButton";
 
 const AVATAR_GRADIENTS = [
   "linear-gradient(135deg,#60a5fa,#2563eb)",
@@ -96,6 +97,13 @@ export function ActiveCollaborationCard({
             External
           </span>
         )}
+      </div>
+
+      <div className="mt-[14px] flex justify-end border-t border-[#F1F3F5] pt-[14px]">
+        <EndCollaborationButton
+          collaborationId={item.id}
+          counterpartLabel="expert"
+        />
       </div>
     </div>
   );

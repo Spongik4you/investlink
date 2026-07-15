@@ -434,6 +434,16 @@ model StartupExpertCollaboration {
   rating              Decimal?                  @db.Decimal(3, 2)
   projectsCount       Int                       @default(1)
   currentProjectTitle String?
+  /// ── Terminare + feedback privat (bidirecțional) ──
+  /// Setate la încheierea colaborării. endedBy = cine a apăsat "termină".
+  /// Rating-urile sunt 1-5, private pe colaborare (nu publice, nu în director).
+  /// startupRating = nota pe care startup-ul o dă expertului; expertRating = invers.
+  endReason           String?
+  endedBy             CollaborationParty?
+  startupRating       Int?
+  startupComment      String?
+  expertRating        Int?
+  expertComment       String?
   startedAt           DateTime?
   endedAt             DateTime?
   createdAt           DateTime                  @default(now())
@@ -453,6 +463,11 @@ enum InvitationStatus {
   WITHDRAWN
 }
 
+enum CollaborationParty {
+  STARTUP
+  EXPERT
+}
+
 model CollaborationInvitation {
   id               String           @id @default(cuid())
   startupProfileId String
@@ -469,7 +484,6 @@ model CollaborationInvitation {
 
   /// Un startup nu poate avea două invitații PENDING active către același
   /// expert simultan. Vezi nota din migrare despre limita acestui unique.
-  @@unique([startupProfileId, expertProfileId, status])
   @@index([expertProfileId, status])
   @@index([startupProfileId, status])
 }
