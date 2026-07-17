@@ -2,6 +2,7 @@ import {
   Bell,
   BookOpenText,
   BriefcaseBusiness,
+  Compass,
   CreditCard,
   LayoutGrid,
   MessageSquareMore,
@@ -14,6 +15,7 @@ import {
 export type ExpertPageKey =
   | "dashboard"
   | "opportunities"
+  | "browse"
   | "portfolio"
   | "casestudies"
   | "messages"
@@ -33,6 +35,10 @@ export const EXPERT_PAGE_META: Record<
   opportunities: {
     title: "Opportunities",
     subtitle: "Startup matches and quick gigs for your expertise.",
+  },
+  browse: {
+    title: "Browse Startups",
+    subtitle: "Find startups that need your skills and apply directly.",
   },
   portfolio: {
     title: "My Portfolio",
@@ -85,6 +91,13 @@ export const EXPERT_NAV_ITEMS: ExpertNavItem[] = [
     label: "Opportunities",
     href: "/dashboard/expert/opportunities",
     icon: Sparkles,
+    section: "core",
+  },
+  {
+    key: "browse",
+    label: "Browse Startups",
+    href: "/dashboard/expert/browse",
+    icon: Compass,
     section: "core",
   },
   {
@@ -141,6 +154,7 @@ export const EXPERT_NAV_ITEMS: ExpertNavItem[] = [
 const EXPERT_PAGE_KEYS: ExpertPageKey[] = [
   "dashboard",
   "opportunities",
+  "browse",
   "portfolio",
   "casestudies",
   "messages",

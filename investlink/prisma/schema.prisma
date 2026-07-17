@@ -216,6 +216,11 @@ model StartupProfile {
   fundingRounds        StartupFundingRound[]
   investorRelations    StartupInvestorRelation[]
   expertCollaborations StartupExpertCollaboration[]
+  /// Numele spune "sent" din motive istorice (pasul 2, când doar startup-ul
+  /// trimitea). De la fluxul bidirecțional, relația conține TOATE cererile
+  /// de colaborare ale acestui startup — și invitațiile trimise de el
+  /// (initiatedBy=STARTUP), și aplicațiile primite de la experți
+  /// (initiatedBy=EXPERT). Filtrează pe initiatedBy când contează direcția.
   sentInvitations      CollaborationInvitation[]
 
   createdAt DateTime @default(now())
@@ -431,9 +436,9 @@ model StartupExpertCollaboration {
   hourlyRate          Decimal?                  @db.Decimal(10, 2)
   totalPaid           Decimal                   @default(0) @db.Decimal(14, 2)
   workloadPercent     Int?
-  rating              Decimal?                  @db.Decimal(3, 2)
   projectsCount       Int                       @default(1)
   currentProjectTitle String?
+
   /// ── Terminare + feedback privat (bidirecțional) ──
   /// Setate la încheierea colaborării. endedBy = cine a apăsat "termină".
   /// Rating-urile sunt 1-5, private pe colaborare (nu publice, nu în director).
@@ -444,16 +449,23 @@ model StartupExpertCollaboration {
   startupComment      String?
   expertRating        Int?
   expertComment       String?
-  startedAt           DateTime?
-  endedAt             DateTime?
-  createdAt           DateTime                  @default(now())
-  updatedAt           DateTime                  @updatedAt
+
+  startedAt DateTime?
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   startupProfile StartupProfile @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
   expertProfile  ExpertProfile? @relation(fields: [expertProfileId], references: [id], onDelete: SetNull)
 
   @@index([startupProfileId])
   @@index([expertProfileId])
+}
+
+/// Cine a inițiat o acțiune pe colaborare (terminare, feedback).
+enum CollaborationParty {
+  STARTUP
+  EXPERT
 }
 
 enum InvitationStatus {
@@ -463,17 +475,16 @@ enum InvitationStatus {
   WITHDRAWN
 }
 
-enum CollaborationParty {
-  STARTUP
-  EXPERT
-}
-
 model CollaborationInvitation {
   id               String           @id @default(cuid())
   startupProfileId String
   expertProfileId  String
   roleTitle        String
   message          String?
+  /// Cine a inițiat cererea: STARTUP = invitație (oferă rol), EXPERT = aplicație
+  /// (se propune la un rol). Determină cine RĂSPUNDE: partea opusă lui initiatedBy.
+  /// Default STARTUP păstrează invitațiile existente corecte fără migrare de date.
+  initiatedBy      CollaborationParty @default(STARTUP)
   status           InvitationStatus @default(PENDING)
   respondedAt      DateTime?
   createdAt        DateTime         @default(now())
@@ -482,8 +493,12 @@ model CollaborationInvitation {
   startupProfile StartupProfile @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
   expertProfile  ExpertProfile  @relation(fields: [expertProfileId], references: [id], onDelete: Cascade)
 
-  /// Un startup nu poate avea două invitații PENDING active către același
-  /// expert simultan. Vezi nota din migrare despre limita acestui unique.
+  // Unicitatea reală ("max o invitație PENDING per pereche") NU se poate
+  // exprima declarativ în Prisma — e un partial unique index pe status=PENDING,
+  // adăugat prin SQL manual în migrarea de la pasul 4.5. Un @@unique clasic pe
+  // [startup, expert, status] ar rupe istoricul repetat de colaborări (ai putea
+  // avea o singură invitație ACCEPTED per pereche, deci o singură colaborare
+  // vreodată). Vezi migration.sql.
   @@index([expertProfileId, status])
   @@index([startupProfileId, status])
 }

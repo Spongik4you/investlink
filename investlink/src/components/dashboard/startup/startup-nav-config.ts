@@ -1,6 +1,7 @@
 import {
     Bell,
     BriefcaseBusiness,
+    Inbox,
     LayoutGrid,
     LineChart,
     ScrollText,
@@ -16,6 +17,7 @@ import {
     | "portfolios"
     | "investors"
     | "experts"
+    | "applications"
     | "auditlogs"
     | "settings"
     | "notifications";
@@ -43,6 +45,10 @@ import {
     experts: {
       title: "Expert Network",
       subtitle: "Manage current experts and discover new talent.",
+    },
+    applications: {
+      title: "Applications",
+      subtitle: "Experts who applied to work with you.",
     },
     auditlogs: {
       title: "Audit Logs",
@@ -103,6 +109,13 @@ import {
       section: "collaboration",
     },
     {
+      key: "applications",
+      label: "Applications",
+      href: "/dashboard/startup/applications",
+      icon: Inbox,
+      section: "collaboration",
+    },
+    {
       key: "auditlogs",
       label: "Audit Logs",
       href: "/dashboard/startup/auditlogs",
@@ -131,6 +144,7 @@ import {
     "portfolios",
     "investors",
     "experts",
+    "applications",
     "auditlogs",
     "settings",
     "notifications",

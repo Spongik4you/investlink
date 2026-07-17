@@ -2,15 +2,16 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentStartupProfile } from "@/lib/dashboard/get-current-startup";
+import { getCurrentExpertProfile } from "@/lib/dashboard/get-current-expert";
 
 /**
- * WITHDRAW: startup-ul retrage o invitație PENDING pe care a trimis-o, înainte
- * ca expertul să răspundă.
+ * WITHDRAW: INIȚIATORUL retrage propria cerere PENDING înainte de răspuns.
+ * BIDIRECȚIONAL:
+ *  - startup retrage o invitație pe care el a inițiat-o (initiatedBy STARTUP)
+ *  - expert retrage o aplicație pe care el a inițiat-o (initiatedBy EXPERT)
  *
- * Endpoint SEPARAT de /api/invitations/[id] (accept/decline) intenționat:
- * acolo actorul e expertul, aici e startup-ul. Autorizări și reguli anti-IDOR
- * diferite — a le amesteca într-un handler care ramifică pe rol e o sursă de
- * bug-uri de securitate. Un endpoint = un actor = o regulă.
+ * Doar inițiatorul poate retrage. Partea care răspunde nu retrage — ea face
+ * decline (alt endpoint). Verificare de proprietate + direcție (anti-IDOR).
  */
 export async function PATCH(
   _req: Request,
@@ -18,38 +19,54 @@ export async function PATCH(
 ) {
   const { id: invitationId } = await params;
 
-  // 1. Autorizare: startup-ul curent, din sesiune.
-  const startup = await getCurrentStartupProfile();
-  if (!startup) {
-    return NextResponse.json(
-      { error: "Doar conturile de startup pot retrage invitații." },
-      { status: 403 },
-    );
+  const [startup, expert] = await Promise.all([
+    getCurrentStartupProfile(),
+    getCurrentExpertProfile(),
+  ]);
+
+  if (!startup && !expert) {
+    return NextResponse.json({ error: "Neautorizat." }, { status: 403 });
   }
 
-  // 2. Invitația există ȘI aparține ACESTUI startup.
-  //    Filtrul pe startupProfileId din sesiune e apărarea anti-IDOR: un startup
-  //    nu poate retrage invitația altui startup, chiar ghicind un id valid.
+  const ownershipOr: Array<Record<string, string>> = [];
+  if (startup) ownershipOr.push({ startupProfileId: startup.startupProfileId });
+  if (expert) ownershipOr.push({ expertProfileId: expert.expertProfileId });
+
   const invitation = await prisma.collaborationInvitation.findFirst({
-    where: { id: invitationId, startupProfileId: startup.startupProfileId },
-    select: { id: true, status: true },
+    where: { id: invitationId, OR: ownershipOr },
+    select: {
+      id: true,
+      status: true,
+      initiatedBy: true,
+      startupProfileId: true,
+      expertProfileId: true,
+    },
   });
 
   if (!invitation) {
-    // 404, nu 403: nu confirmăm existența invitației altcuiva.
     return NextResponse.json(
-      { error: "Invitația nu a fost găsită." },
+      { error: "Cererea nu a fost găsită." },
       { status: 404 },
     );
   }
 
-  // 3. Se poate retrage DOAR o invitație încă în așteptare.
-  //    Dacă expertul a acceptat/refuzat deja, retragerea nu mai are sens —
-  //    și ar crea inconsistență (o colaborare ACCEPTED cu invitație WITHDRAWN).
+  // Doar INIȚIATORUL retrage: partea care a inițiat trebuie să fie apelantul.
+  const callerIsInitiator =
+    invitation.initiatedBy === "STARTUP"
+      ? startup?.startupProfileId === invitation.startupProfileId
+      : expert?.expertProfileId === invitation.expertProfileId;
+
+  if (!callerIsInitiator) {
+    return NextResponse.json(
+      { error: "Doar cel care a trimis cererea o poate retrage." },
+      { status: 403 },
+    );
+  }
+
   if (invitation.status !== "PENDING") {
     return NextResponse.json(
       {
-        error: `Invitația nu mai poate fi retrasă (status: ${invitation.status.toLowerCase()}).`,
+        error: `Cererea nu mai poate fi retrasă (status: ${invitation.status.toLowerCase()}).`,
       },
       { status: 409 },
     );
