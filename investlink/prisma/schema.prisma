@@ -154,6 +154,11 @@ model InvestorProfile {
 
   investments InvestmentPosition[]
 
+  // Investitor↔startup (fluxul nou). Nume distincte de `investments` de mai sus
+  // (care e scheletul vechi InvestmentPosition, nefolosit în cod).
+  investmentInterests InvestmentInterest[]
+  investmentRecords   Investment[]
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([investorType])
@@ -222,6 +227,10 @@ model StartupProfile {
   /// (initiatedBy=STARTUP), și aplicațiile primite de la experți
   /// (initiatedBy=EXPERT). Filtrează pe initiatedBy când contează direcția.
   sentInvitations      CollaborationInvitation[]
+
+  // Investitor↔startup (fluxul nou).
+  investmentInterests InvestmentInterest[]
+  investmentRecords   Investment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -501,4 +510,86 @@ model CollaborationInvitation {
   // vreodată). Vezi migration.sql.
   @@index([expertProfileId, status])
   @@index([startupProfileId, status])
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INVESTITOR ↔ STARTUP
+// ═══════════════════════════════════════════════════════════════════
+
+/// Cine a inițiat cererea de interes investitor-startup.
+/// Enum separat de CollaborationParty (STARTUP/EXPERT) intenționat — un enum
+/// nu trebuie să însemne lucruri diferite în contexte diferite.
+enum InvestmentParty {
+  INVESTOR
+  STARTUP
+}
+
+/// Statusul unei cereri de interes (match investitor-startup).
+/// Separat de InvestmentStatus (scheletul vechi) — semantica e a unui match,
+/// nu a unei investiții.
+enum InvestmentInterestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+}
+
+/// EXPRESIA DE INTERES (match-ul). Paralel cu CollaborationInvitation, dar
+/// pentru investitor↔startup. Bidirecțional: oricare parte poate iniția.
+/// Răspunde partea opusă lui initiatedBy. NU conține date financiare — doar
+/// "am fost de acord să discutăm o investiție". Datele reale sunt în Investment.
+model InvestmentInterest {
+  id                String                   @id @default(cuid())
+  investorProfileId String
+  startupProfileId  String
+  message           String?
+  /// INVESTOR = investitorul își exprimă interesul într-un startup.
+  /// STARTUP = startup-ul își exprimă interesul către un investitor.
+  initiatedBy       InvestmentParty
+  status            InvestmentInterestStatus @default(PENDING)
+  respondedAt       DateTime?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  investorProfile InvestorProfile @relation(fields: [investorProfileId], references: [id], onDelete: Cascade)
+  startupProfile  StartupProfile  @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
+
+  // Blocarea strictă ("max o cerere PENDING per pereche") se impune printr-un
+  // partial unique index adăugat prin SQL manual (vezi migrarea), la fel ca la
+  // CollaborationInvitation. Un @@unique clasic ar rupe istoricul repetat.
+  @@index([investorProfileId, status])
+  @@index([startupProfileId, status])
+}
+
+/// EVIDENȚA FINANCIARĂ. Date introduse MANUAL de startup (sursă unică de
+/// adevăr), agregate de platformă pentru statistică. NU e procesare de bani —
+/// platforma nu verifică, nu mișcă fonduri; e evidența fondatorului despre
+/// propriul business, făcută utilă prin agregare.
+///
+/// Legat de InvestorProfile + StartupProfile prin FK-uri REALE (spre deosebire
+/// de scheletul vechi InvestmentPosition/StartupInvestorRelation care lega de
+/// StartupCompany / text liber). Asta unifică cele două universuri financiare.
+///
+/// investorProfileId e opțional: un startup poate înregistra o investiție de la
+/// un investitor care NU e pe platformă (înger extern, fond) — atunci doar
+/// investorName. Simetric cu displayName de la colaborări externe.
+model Investment {
+  id                String    @id @default(cuid())
+  startupProfileId  String
+  investorProfileId String?
+  /// Nume afișat — pentru investitori externi (fără profil) sau ca fallback.
+  investorName      String
+  amountUsd         Decimal   @db.Decimal(18, 2)
+  round             String?
+  equityPercent     Decimal?  @db.Decimal(8, 4)
+  investedAt        DateTime
+  note              String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  startupProfile  StartupProfile   @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
+  investorProfile InvestorProfile? @relation(fields: [investorProfileId], references: [id], onDelete: SetNull)
+
+  @@index([startupProfileId])
+  @@index([investorProfileId])
 }
