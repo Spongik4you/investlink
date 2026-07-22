@@ -1,5 +1,6 @@
 import {
     Bell,
+    Compass,
     BriefcaseBusiness,
     Inbox,
     LayoutGrid,
@@ -16,6 +17,7 @@ import {
     | "analytics"
     | "portfolios"
     | "investors"
+    | "browse-investors"
     | "experts"
     | "applications"
     | "auditlogs"
@@ -41,6 +43,10 @@ import {
     investors: {
       title: "Investors",
       subtitle: "Manage and track all your investors.",
+    },
+    "browse-investors": {
+      title: "Discover Investors",
+      subtitle: "Find investors matching your stage and sector.",
     },
     experts: {
       title: "Expert Network",
@@ -102,6 +108,13 @@ import {
       section: "core",
     },
     {
+      key: "browse-investors",
+      label: "Discover Investors",
+      href: "/dashboard/startup/browse-investors",
+      icon: Compass,
+      section: "core",
+    },
+    {
       key: "experts",
       label: "Expert Network",
       href: "/dashboard/startup/experts",
@@ -143,6 +156,7 @@ import {
     "analytics",
     "portfolios",
     "investors",
+    "browse-investors",
     "experts",
     "applications",
     "auditlogs",

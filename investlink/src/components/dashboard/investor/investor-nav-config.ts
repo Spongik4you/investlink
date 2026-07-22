@@ -1,5 +1,7 @@
 import {
     BriefcaseBusiness,
+    Inbox,
+    Compass,
     FolderLock,
     LayoutGrid,
     LineChart,
@@ -11,6 +13,8 @@ import {
   
   export type InvestorPageKey =
     | "dashboard"
+    | "browse"
+    | "interests"
     | "portfolio"
     | "experts"
     | "analytics"
@@ -35,6 +39,14 @@ import {
     portfolio: {
       title: "Equity Portfolio",
       subtitle: "Portfolio positions and performance.",
+    },
+    browse: {
+      title: "Discover Startups",
+      subtitle: "Find startups matching your thesis.",
+    },
+    interests: {
+      title: "Startup Interest",
+      subtitle: "Startups interested in your capital.",
     },
     experts: {
       title: "Expert Access",
@@ -72,6 +84,20 @@ import {
       label: "Dashboard",
       href: "/dashboard/investor",
       icon: LayoutGrid,
+      section: "core",
+    },
+    {
+      key: "browse",
+      label: "Discover Startups",
+      href: "/dashboard/investor/browse",
+      icon: Compass,
+      section: "core",
+    },
+    {
+      key: "interests",
+      label: "Startup Interest",
+      href: "/dashboard/investor/interests",
+      icon: Inbox,
       section: "core",
     },
     {
@@ -120,6 +146,8 @@ import {
 
   const INVESTOR_PAGE_KEYS: InvestorPageKey[] = [
     "dashboard",
+    "browse",
+    "interests",
     "portfolio",
     "experts",
     "analytics",
