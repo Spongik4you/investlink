@@ -1,6 +1,7 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -43,6 +44,7 @@ model User {
   emailVerified DateTime?
   accounts      Account[]
   sessions      Session[]
+  notifications Notification[]
 
   expertProfile   ExpertProfile?
   investorProfile InvestorProfile?
@@ -152,10 +154,7 @@ model InvestorProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  investments InvestmentPosition[]
-
-  // Investitor↔startup (fluxul nou). Nume distincte de `investments` de mai sus
-  // (care e scheletul vechi InvestmentPosition, nefolosit în cod).
+  // Investitor↔startup.
   investmentInterests InvestmentInterest[]
   investmentRecords   Investment[]
 
@@ -217,9 +216,6 @@ model StartupProfile {
 
   /// flexible storage
   extras Json?
-
-  fundingRounds        StartupFundingRound[]
-  investorRelations    StartupInvestorRelation[]
   expertCollaborations StartupExpertCollaboration[]
   /// Numele spune "sent" din motive istorice (pasul 2, când doar startup-ul
   /// trimitea). De la fluxul bidirecțional, relația conține TOATE cererile
@@ -279,157 +275,12 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-enum InvestmentPositionStatus {
-  ACTIVE
-  WATCHLIST
-  EXITED
-}
-
-enum StartupStage {
-  PRE_SEED
-  SEED
-  SERIES_A
-  SERIES_B
-  SERIES_C
-}
-
-model StartupCompany {
-  id      String        @id @default(cuid())
-  name    String
-  slug    String        @unique
-  sector  String?
-  stage   StartupStage?
-  logoUrl String?
-  country String?
-
-  positions InvestmentPosition[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model InvestmentPosition {
-  id                String @id @default(cuid())
-  investorProfileId String
-  startupCompanyId  String
-
-  investedAmount Decimal  @db.Decimal(18, 2)
-  currentValue   Decimal  @db.Decimal(18, 2)
-  equityPercent  Decimal? @db.Decimal(8, 4)
-
-  positionStatus InvestmentPositionStatus @default(ACTIVE)
-  isActive       Boolean                  @default(true)
-
-  // 0-100, îl folosim provizoriu pentru risk analysis
-  riskScore Int @default(30)
-
-  openedAt DateTime  @default(now())
-  closedAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  investorProfile InvestorProfile @relation(fields: [investorProfileId], references: [id], onDelete: Cascade)
-  startupCompany  StartupCompany  @relation(fields: [startupCompanyId], references: [id], onDelete: Cascade)
-
-  @@index([investorProfileId, isActive])
-  @@index([startupCompanyId])
-}
-
-// model Notification {
-//   id        String   @id @default(cuid())
-//   userId    String
-//   title     String
-//   body      String?
-//   isRead    Boolean  @default(false)
-//   createdAt DateTime @default(now())
-
-//   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-//   @@index([userId, isRead])
-// }
-enum FundingRoundStatus {
-  DRAFT
-  OPEN
-  CLOSED
-  CANCELLED
-}
-
-enum InvestmentStatus {
-  PENDING
-  ACTIVE
-  DECLINED
-  COMPLETED
-}
-
-enum InvestorRelationStatus {
-  PIPELINE
-  PENDING
-  ACTIVE
-  INACTIVE
-}
-
 enum ExpertCollaborationStatus {
   ACTIVE
   BUSY
   COMPLETED
   PAUSED
   CANCELLED
-}
-
-model StartupFundingRound {
-  id                   String             @id @default(cuid())
-  startupProfileId     String
-  title                String
-  targetAmount         Decimal            @db.Decimal(14, 2)
-  raisedAmount         Decimal            @default(0) @db.Decimal(14, 2)
-  equityOfferedPercent Decimal?           @db.Decimal(5, 2)
-  status               FundingRoundStatus @default(DRAFT)
-  openedAt             DateTime?
-  closedAt             DateTime?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-
-  startupProfile StartupProfile      @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
-  investments    StartupInvestment[]
-
-  @@index([startupProfileId])
-}
-
-model StartupInvestorRelation {
-  id               String                 @id @default(cuid())
-  startupProfileId String
-  displayName      String
-  organizationName String?
-  status           InvestorRelationStatus @default(PIPELINE)
-  email            String?
-  totalCommitted   Decimal                @default(0) @db.Decimal(14, 2)
-  equityPercent    Decimal?               @db.Decimal(5, 2)
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-
-  startupProfile StartupProfile      @relation(fields: [startupProfileId], references: [id], onDelete: Cascade)
-  investments    StartupInvestment[]
-
-  @@index([startupProfileId])
-}
-
-model StartupInvestment {
-  id                        String           @id @default(cuid())
-  startupFundingRoundId     String
-  startupInvestorRelationId String
-  amount                    Decimal          @db.Decimal(14, 2)
-  equityPercent             Decimal?         @db.Decimal(5, 2)
-  status                    InvestmentStatus @default(PENDING)
-  investedAt                DateTime?
-  createdAt                 DateTime         @default(now())
-  updatedAt                 DateTime         @updatedAt
-
-  fundingRound     StartupFundingRound     @relation(fields: [startupFundingRoundId], references: [id], onDelete: Cascade)
-  investorRelation StartupInvestorRelation @relation(fields: [startupInvestorRelationId], references: [id], onDelete: Cascade)
-
-  @@index([startupFundingRoundId])
-  @@index([startupInvestorRelationId])
 }
 
 model StartupExpertCollaboration {
@@ -525,7 +376,7 @@ enum InvestmentParty {
 }
 
 /// Statusul unei cereri de interes (match investitor-startup).
-/// Separat de InvestmentStatus (scheletul vechi) — semantica e a unui match,
+/// Semantica e a unui match (cerere de interes), nu a unei investiții.
 /// nu a unei investiții.
 enum InvestmentInterestStatus {
   PENDING
@@ -567,8 +418,8 @@ model InvestmentInterest {
 /// propriul business, făcută utilă prin agregare.
 ///
 /// Legat de InvestorProfile + StartupProfile prin FK-uri REALE (spre deosebire
-/// de scheletul vechi InvestmentPosition/StartupInvestorRelation care lega de
-/// StartupCompany / text liber). Asta unifică cele două universuri financiare.
+/// (scheletul vechi, șters în pasul E, lega de un model separat de companie
+/// și de text liber — de aceea datele nu se uneau).
 ///
 /// investorProfileId e opțional: un startup poate înregistra o investiție de la
 /// un investitor care NU e pe platformă (înger extern, fond) — atunci doar
@@ -592,4 +443,48 @@ model Investment {
 
   @@index([startupProfileId])
   @@index([investorProfileId])
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NOTIFICĂRI
+// ═══════════════════════════════════════════════════════════════════
+
+/// Tipul evenimentului. Enum (nu text liber) ca să putem filtra/grupa mai
+/// târziu și ca să nu se strecoare tipuri inventate în cod.
+enum NotificationType {
+  COLLABORATION_INVITATION_RECEIVED
+  COLLABORATION_APPLICATION_RECEIVED
+  COLLABORATION_REQUEST_ACCEPTED
+  COLLABORATION_REQUEST_DECLINED
+  COLLABORATION_ENDED
+  INVESTMENT_INTEREST_RECEIVED
+  INVESTMENT_INTEREST_ACCEPTED
+  INVESTMENT_INTEREST_DECLINED
+}
+
+/// O notificare in-app pentru un utilizator.
+///
+/// Textul e DENORMALIZAT (title/body scrise la momentul evenimentului), nu
+/// reconstruit din referințe. O notificare e jurnalul a ce s-a întâmplat
+/// atunci: dacă expertul își schimbă numele mâine, notificarea de acum o lună
+/// trebuie să rămână cum a fost. Bonus: randare cu un singur query.
+///
+/// Destinatarul e User (nu profilul de rol) — un om are un singur inbox.
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String?
+  /// Unde duce click-ul, ex. "/dashboard/startup/applications".
+  linkPath  String?
+  /// null = necitită. Timestamp = momentul citirii.
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Necitite pentru badge + listare cronologică.
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
 }

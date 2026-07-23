@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentExpertProfile } from "@/lib/dashboard/get-current-expert";
 import { getCurrentStartupProfile } from "@/lib/dashboard/get-current-startup";
+import { notifyCollaborationRequestAnswered } from "@/lib/notifications/notify";
 
 const respondSchema = z.object({
   action: z.enum(["accept", "decline"]),
@@ -99,9 +100,12 @@ export async function PATCH(
 
   // 6. DECLINE: o singură scriere.
   if (action === "decline") {
-    await prisma.collaborationInvitation.update({
-      where: { id: invitation.id },
-      data: { status: "DECLINED", respondedAt: new Date() },
+    await prisma.$transaction(async (tx) => {
+      await tx.collaborationInvitation.update({
+        where: { id: invitation.id },
+        data: { status: "DECLINED", respondedAt: new Date() },
+      });
+      await notifyCollaborationRequestAnswered(tx, invitation.id, "decline");
     });
     return NextResponse.json({ ok: true, status: "DECLINED" });
   }
@@ -124,7 +128,7 @@ export async function PATCH(
         .filter(Boolean)
         .join(" ") || "Expert";
 
-    return tx.startupExpertCollaboration.create({
+    const created = await tx.startupExpertCollaboration.create({
       data: {
         startupProfileId: invitation.startupProfileId,
         expertProfileId: invitation.expertProfileId,
@@ -135,6 +139,10 @@ export async function PATCH(
       },
       select: { id: true },
     });
+
+    await notifyCollaborationRequestAnswered(tx, invitation.id, "accept");
+
+    return created;
   });
 
   return NextResponse.json({

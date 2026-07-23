@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentInvestorProfile } from "@/lib/dashboard/get-current-investor";
 import { getCurrentStartupProfile } from "@/lib/dashboard/get-current-startup";
+import { notifyInvestmentInterestAnswered } from "@/lib/notifications/notify";
 
 const respondSchema = z.object({
   action: z.enum(["accept", "decline"]),
@@ -91,12 +92,15 @@ export async function PATCH(
     );
   }
 
-  await prisma.investmentInterest.update({
-    where: { id: interest.id },
-    data: {
-      status: action === "accept" ? "ACCEPTED" : "DECLINED",
-      respondedAt: new Date(),
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.investmentInterest.update({
+      where: { id: interest.id },
+      data: {
+        status: action === "accept" ? "ACCEPTED" : "DECLINED",
+        respondedAt: new Date(),
+      },
+    });
+    await notifyInvestmentInterestAnswered(tx, interest.id, action);
   });
 
   return NextResponse.json({

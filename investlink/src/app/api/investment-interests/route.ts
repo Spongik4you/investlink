@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentInvestorProfile } from "@/lib/dashboard/get-current-investor";
+import { notifyInvestmentInterestCreated } from "@/lib/notifications/notify";
 
 const interestSchema = z.object({
   startupProfileId: z.string().min(1),
@@ -78,15 +79,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: msg }, { status: 409 });
   }
 
-  const interest = await prisma.investmentInterest.create({
-    data: {
-      startupProfileId,
-      investorProfileId: investor.investorProfileId,
-      message: message || null,
-      initiatedBy: "INVESTOR",
-      status: "PENDING",
-    },
-    select: { id: true, status: true, createdAt: true },
+  const interest = await prisma.$transaction(async (tx) => {
+    const created = await tx.investmentInterest.create({
+      data: {
+        startupProfileId,
+        investorProfileId: investor.investorProfileId,
+        message: message || null,
+        initiatedBy: "INVESTOR",
+        status: "PENDING",
+      },
+      select: { id: true, status: true, createdAt: true },
+    });
+    await notifyInvestmentInterestCreated(tx, created.id);
+    return created;
   });
 
   return NextResponse.json({ ok: true, interest }, { status: 201 });

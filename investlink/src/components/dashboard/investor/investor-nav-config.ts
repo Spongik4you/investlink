@@ -1,4 +1,5 @@
 import {
+    Bell,
     BriefcaseBusiness,
     Inbox,
     Compass,
@@ -20,7 +21,8 @@ import {
     | "analytics"
     | "consultations"
     | "vault"
-    | "settings";
+    | "settings"
+    | "notifications";
   
   export const INVESTOR_PAGE_META: Record<
     InvestorPageKey,
@@ -47,6 +49,10 @@ import {
     interests: {
       title: "Startup Interest",
       subtitle: "Startups interested in your capital.",
+    },
+    notifications: {
+      title: "Notifications",
+      subtitle: "Activity across your investments and requests.",
     },
     experts: {
       title: "Expert Access",
@@ -136,6 +142,13 @@ import {
       section: "compliance",
     },
     {
+      key: "notifications",
+      label: "Notifications",
+      href: "/dashboard/investor/notifications",
+      icon: Bell,
+      section: "compliance",
+    },
+    {
       key: "settings",
       label: "User Preferences",
       href: "/dashboard/investor/settings",
@@ -154,6 +167,7 @@ import {
     "consultations",
     "vault",
     "settings",
+    "notifications",
   ];
   
   export function getInvestorPageFromPathname(pathname: string): InvestorPageKey {

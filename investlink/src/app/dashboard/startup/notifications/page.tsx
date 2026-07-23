@@ -1,10 +1,8 @@
-import { ComingSoonPage } from "@/components/dashboard/shared/ComingSoonPage";
+import { NotificationsPageContent } from "@/components/dashboard/shared/NotificationsPageContent";
 
-export default function StartupNotificationsPage() {
-  return (
-    <ComingSoonPage
-      feature="Notifications"
-      description="Platform activity updates will appear here."
-    />
-  );
+// Autorizarea de rută e făcută de middleware.ts. Notificările sunt per-USER
+// (rol-agnostic): API-ul derivă destinatarul din sesiune, deci aceeași
+// componentă servește toate cele trei roluri.
+export default function NotificationsPage() {
+  return <NotificationsPageContent />;
 }

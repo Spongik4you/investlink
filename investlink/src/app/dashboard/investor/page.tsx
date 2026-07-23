@@ -1,19 +1,15 @@
-import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
-import { authOptions } from "@/lib/auth";
-import { getInvestorOverviewByEmail } from "@/lib/dashboard/get-investor-overview";
-import { InvestorOverviewSection } from "@/components/dashboard/investor/InvestorOverviewSection";
+import { getCurrentInvestorProfile } from "@/lib/dashboard/get-current-investor";
+import { getInvestorOverview } from "@/lib/dashboard/get-investor-overview";
+import { InvestorOverviewSection } from "@/components/dashboard/investor/overview/InvestorOverviewSection";
 
+// Autorizarea de rută (rol INVESTOR) e făcută de middleware.ts.
 export default async function InvestorDashboardPage() {
-  const session = await getServerSession(authOptions);
+  const investor = await getCurrentInvestorProfile();
+  if (!investor) redirect("/dashboard");
 
-  if (!session?.user?.email) {
-    throw new Error(
-      "InvestorDashboardPage: sesiune lipsă deși middleware ar fi trebuit să blocheze accesul.",
-    );
-  }
+  const data = await getInvestorOverview(investor.investorProfileId);
 
-  const overview = await getInvestorOverviewByEmail(session.user.email);
-
-  return <InvestorOverviewSection data={overview} />;
+  return <InvestorOverviewSection data={data} />;
 }

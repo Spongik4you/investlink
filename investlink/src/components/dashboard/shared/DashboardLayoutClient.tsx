@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Search, TrendingUp, type LucideIcon } from "lucide-react";
+import { Search, TrendingUp, type LucideIcon } from "lucide-react";
+
+import { NotificationBell } from "./NotificationBell";
 import type { ReactNode } from "react";
 
 export type DashboardNavData = {
@@ -181,14 +183,7 @@ export function DashboardLayoutClient<TPageKey extends string>({
             />
           </div>
 
-          <button
-            type="button"
-            className="relative flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-[#F9FAFB]"
-            aria-label="Notifications"
-          >
-            <Bell className="h-4 w-4 text-[#4B5563]" />
-            <span className="absolute right-[7px] top-[7px] h-2 w-2 rounded-full border-2 border-white bg-[#2563EB]" />
-          </button>
+          <NotificationBell />
 
           <div className="flex items-center gap-[10px]">
             <div className="text-right">

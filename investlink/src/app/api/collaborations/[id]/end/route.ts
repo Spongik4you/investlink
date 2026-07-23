@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentStartupProfile } from "@/lib/dashboard/get-current-startup";
 import { getCurrentExpertProfile } from "@/lib/dashboard/get-current-expert";
+import { notifyCollaborationEnded } from "@/lib/notifications/notify";
 
 const endSchema = z.object({
   outcome: z.enum(["completed", "cancelled"]),
@@ -96,16 +97,24 @@ export async function PATCH(
     ? { startupRating: rating ?? null, startupComment: comment || null }
     : { expertRating: rating ?? null, expertComment: comment || null };
 
-  const updated = await prisma.startupExpertCollaboration.update({
-    where: { id: collaboration.id },
-    data: {
-      status: outcome === "completed" ? "COMPLETED" : "CANCELLED",
-      endedBy,
-      endReason: reason || null,
-      endedAt: new Date(),
-      ...ratingFields,
-    },
-    select: { id: true, status: true },
+  // Notificarea citește endedBy, deci se creează DUPĂ update, în aceeași
+  // tranzacție — cealaltă parte află că relația s-a încheiat.
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.startupExpertCollaboration.update({
+      where: { id: collaboration.id },
+      data: {
+        status: outcome === "completed" ? "COMPLETED" : "CANCELLED",
+        endedBy,
+        endReason: reason || null,
+        endedAt: new Date(),
+        ...ratingFields,
+      },
+      select: { id: true, status: true },
+    });
+
+    await notifyCollaborationEnded(tx, collaboration.id);
+
+    return result;
   });
 
   return NextResponse.json({ ok: true, status: updated.status });

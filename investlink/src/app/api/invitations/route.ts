@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentStartupProfile } from "@/lib/dashboard/get-current-startup";
+import { notifyCollaborationRequestCreated } from "@/lib/notifications/notify";
 
 const inviteSchema = z.object({
   expertProfileId: z.string().min(1),
@@ -93,15 +94,20 @@ export async function POST(req: Request) {
   }
 
   // 5. Creează invitația.
-  const invitation = await prisma.collaborationInvitation.create({
-    data: {
-      startupProfileId: startup.startupProfileId,
-      expertProfileId,
-      roleTitle,
-      message: message || null,
-      status: "PENDING",
-    },
-    select: { id: true, status: true, createdAt: true },
+  // Creare + notificare ATOMIC: dacă notificarea eșuează, invitația nu există.
+  const invitation = await prisma.$transaction(async (tx) => {
+    const created = await tx.collaborationInvitation.create({
+      data: {
+        startupProfileId: startup.startupProfileId,
+        expertProfileId,
+        roleTitle,
+        message: message || null,
+        status: "PENDING",
+      },
+      select: { id: true, status: true, createdAt: true },
+    });
+    await notifyCollaborationRequestCreated(tx, created.id);
+    return created;
   });
 
   return NextResponse.json({ ok: true, invitation }, { status: 201 });

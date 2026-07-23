@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentExpertProfile } from "@/lib/dashboard/get-current-expert";
+import { notifyCollaborationRequestCreated } from "@/lib/notifications/notify";
 
 const applySchema = z.object({
   startupProfileId: z.string().min(1),
@@ -75,16 +76,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: msg }, { status: 409 });
   }
 
-  const application = await prisma.collaborationInvitation.create({
-    data: {
-      startupProfileId,
-      expertProfileId: expert.expertProfileId,
-      roleTitle,
-      message: message || null,
-      initiatedBy: "EXPERT",
-      status: "PENDING",
-    },
-    select: { id: true, status: true, createdAt: true },
+  const application = await prisma.$transaction(async (tx) => {
+    const created = await tx.collaborationInvitation.create({
+      data: {
+        startupProfileId,
+        expertProfileId: expert.expertProfileId,
+        roleTitle,
+        message: message || null,
+        initiatedBy: "EXPERT",
+        status: "PENDING",
+      },
+      select: { id: true, status: true, createdAt: true },
+    });
+    await notifyCollaborationRequestCreated(tx, created.id);
+    return created;
   });
 
   return NextResponse.json({ ok: true, application }, { status: 201 });
