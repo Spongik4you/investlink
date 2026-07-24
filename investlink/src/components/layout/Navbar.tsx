@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { NavbarAccount } from "./NavbarAccount";
+
 const links = [
   { href: "/", label: "Home" },
   { href: "/investors", label: "Investors" },
@@ -64,17 +66,7 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <Link href="/auth/signin" className="text-sm font-semibold text-slate-600 hover:text-slate-900">
-            Sign In
-          </Link>
-          <Link
-            href="/auth/signup"
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            Get Started
-          </Link>
-        </div>
+        <NavbarAccount />
       </div>
     </header>
   );

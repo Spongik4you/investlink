@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Search, TrendingUp, type LucideIcon } from "lucide-react";
 
 import { NotificationBell } from "./NotificationBell";
+import { AccountMenu } from "./AccountMenu";
 import type { ReactNode } from "react";
 
 export type DashboardNavData = {
@@ -114,14 +115,19 @@ export function DashboardLayoutClient<TPageKey extends string>({
   return (
     <div className="flex h-screen bg-[#F9FAFB] text-[#1F2937]">
       <aside className="flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto border-r border-[#E5E7EB] bg-white">
-        <div className="flex items-center gap-[10px] border-b border-[#F3F4F6] px-5 py-[18px]">
-          <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-[#2563EB]">
+        {/* Logo -> site public. Sesiunea rămâne; e doar navigare. */}
+        <Link
+          href="/"
+          className="group flex items-center gap-[10px] border-b border-[#F3F4F6] px-5 py-[18px] transition hover:bg-[#F9FAFB]"
+          title="Go to InvestLink home"
+        >
+          <div className="flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-[#2563EB] transition group-hover:bg-[#1d4ed8]">
             <TrendingUp className="h-[17px] w-[17px] text-white" />
           </div>
-          <span className="text-[17px] font-bold text-[#111827]">
+          <span className="text-[17px] font-bold text-[#111827] transition group-hover:text-[#2563EB]">
             InvestLink
           </span>
-        </div>
+        </Link>
 
         <div className="px-3 pt-[18px] text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">
           Core Platform
@@ -150,18 +156,13 @@ export function DashboardLayoutClient<TPageKey extends string>({
           </>
         )}
 
-        <div className="mt-auto border-t border-[#F3F4F6] px-3 py-4">
-          <div className="flex items-center gap-[10px]">
+        <div className="mt-auto border-t border-[#F3F4F6] px-3 py-3">
+          <AccountMenu
+            fullName={navData.fullName}
+            roleLabel={navData.roleLabel}
+          >
             <Avatar initials={navData.initials} avatarUrl={navData.avatarUrl} />
-            <div className="min-w-0 leading-[1.3]">
-              <div className="truncate text-[13px] font-semibold text-[#1F2937]">
-                {navData.fullName}
-              </div>
-              <div className="truncate text-[11px] uppercase text-[#9CA3AF]">
-                {navData.roleLabel}
-              </div>
-            </div>
-          </div>
+          </AccountMenu>
         </div>
       </aside>
 
@@ -184,19 +185,6 @@ export function DashboardLayoutClient<TPageKey extends string>({
           </div>
 
           <NotificationBell />
-
-          <div className="flex items-center gap-[10px]">
-            <div className="text-right">
-              <div className="text-[13px] font-semibold text-[#111827]">
-                {navData.fullName}
-              </div>
-              <div className="text-[11px] uppercase text-[#9CA3AF]">
-                {navData.roleLabel}
-              </div>
-            </div>
-
-            <Avatar initials={navData.initials} avatarUrl={navData.avatarUrl} />
-          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto p-7">{children}</main>

@@ -1,21 +1,15 @@
-import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
-import { authOptions } from "@/lib/auth";
-import { getExpertOverviewByEmail } from "@/lib/dashboard/get-expert-overview";
-import { ExpertOverviewSection } from "@/components/dashboard/expert/ExpertOverviewSection";
+import { getCurrentExpertProfile } from "@/lib/dashboard/get-current-expert";
+import { getExpertOverview } from "@/lib/dashboard/get-expert-overview";
+import { ExpertOverviewSection } from "@/components/dashboard/expert/overview/ExpertOverviewSection";
 
-// Autorizarea (sesiune + rol EXPERT + onboarding complet) e verificată
-// deja de middleware.ts pentru orice rută /dashboard/expert/*.
+// Autorizarea de rută (rol EXPERT) e făcută de middleware.ts.
 export default async function ExpertDashboardPage() {
-  const session = await getServerSession(authOptions);
+  const expert = await getCurrentExpertProfile();
+  if (!expert) redirect("/dashboard");
 
-  if (!session?.user?.email) {
-    throw new Error(
-      "ExpertDashboardPage: sesiune lipsă deși middleware ar fi trebuit să blocheze accesul.",
-    );
-  }
+  const data = await getExpertOverview(expert.expertProfileId);
 
-  const overview = await getExpertOverviewByEmail(session.user.email);
-
-  return <ExpertOverviewSection data={overview} />;
+  return <ExpertOverviewSection data={data} />;
 }

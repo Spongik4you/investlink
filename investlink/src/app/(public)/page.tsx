@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Hero from "@/components/marketing/Hero";
 import StatsRow from "@/components/marketing/StatsRow";
 import SectionTitle from "@/components/marketing/SectionTitle";
@@ -76,15 +77,21 @@ export default function HomePage() {
           />
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {[
-              { t: "For Investors", d: "Access curated pipeline of verified startups. Transparency and security." },
-              { t: "For Startups", d: "Get funded and hire world-class experts. Build credibility with verification." },
-              { t: "For Experts", d: "Work with exciting startups globally. Choose flexible compensation models." },
+              { t: "For Investors", d: "Access curated pipeline of verified startups. Transparency and security.", href: "/investors" },
+              { t: "For Startups", d: "Get funded and hire world-class experts. Build credibility with verification.", href: "/startups" },
+              { t: "For Experts", d: "Work with exciting startups globally. Choose flexible compensation models.", href: "/experts" },
             ].map((x) => (
-              <div key={x.t} className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+              <Link
+                key={x.t}
+                href={x.href}
+                className="group rounded-xl border border-slate-100 bg-white p-6 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+              >
                 <h3 className="font-semibold">{x.t}</h3>
                 <p className="mt-2 text-sm text-slate-600">{x.d}</p>
-                <div className="mt-3 text-sm font-semibold text-blue-600">Learn more →</div>
-              </div>
+                <div className="mt-3 text-sm font-semibold text-blue-600">
+                  Learn more <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+                </div>
+              </Link>
             ))}
           </div>
         </div>

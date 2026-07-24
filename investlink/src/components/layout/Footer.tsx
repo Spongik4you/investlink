@@ -3,9 +3,9 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-200">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-5">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
-        <Link href="/" className="group flex items-center gap-2 font-bold text-slate-900">
+        <Link href="/" className="group flex items-center gap-2 font-bold text-white">
           <div className="grid h-9 w-9 place-items-center rounded-md bg-blue-700 text-white
                         transition-transform duration-200 group-hover:scale-105" aria-hidden="true">
             <svg
@@ -24,7 +24,7 @@ export default function Footer() {
                 <path d="M20 8h-6" />
               </svg>
           </div>
-          <span className="text-lg font-bold tracking-tight text-slate-900 text-white">InvestLink</span>
+          <span className="text-lg font-bold tracking-tight text-white">InvestLink</span>
         </Link>
           <p className="mt-4 max-w-sm text-sm text-slate-300">
             Connecting investors, startups, and experts in a trusted global ecosystem.
@@ -41,23 +41,14 @@ export default function Footer() {
           </ul>
         </div>
 
+        {/* Coloanele Company și Legal au fost scoase: toate cele 8 link-uri
+            duceau la href="#". Un link care nu duce nicăieri costă mai multă
+            încredere decât absența lui. Se readaugă când paginile există. */}
         <div>
-          <h4 className="text-sm font-semibold">Company</h4>
+          <h4 className="text-sm font-semibold">Account</h4>
           <ul className="mt-3 space-y-2 text-sm text-slate-300">
-            <li><Link className="hover:text-white" href="#">About</Link></li>
-            <li><Link className="hover:text-white" href="#">Contact</Link></li>
-            <li><Link className="hover:text-white" href="#">Careers</Link></li>
-            <li><Link className="hover:text-white" href="#">Blog</Link></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-sm font-semibold">Legal</h4>
-          <ul className="mt-3 space-y-2 text-sm text-slate-300">
-            <li><Link className="hover:text-white" href="#">Terms</Link></li>
-            <li><Link className="hover:text-white" href="#">Privacy</Link></li>
-            <li><Link className="hover:text-white" href="#">Risk Disclosure</Link></li>
-            <li><Link className="hover:text-white" href="#">Cookies</Link></li>
+            <li><Link className="hover:text-white" href="/auth/signin">Sign in</Link></li>
+            <li><Link className="hover:text-white" href="/auth/signup">Create account</Link></li>
           </ul>
         </div>
       </div>
