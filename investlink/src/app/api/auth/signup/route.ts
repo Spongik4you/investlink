@@ -23,6 +23,8 @@ export async function POST(req: Request) {
     const phone = String(body?.phone ?? "").trim();
     const password = String(body?.password ?? "");
     const confirmPassword = String(body?.confirmPassword ?? "");
+    // Rolul NU se mai alege la signup (varianta A): e un placeholder până la
+    // pasul 0 al onboarding-ului, care e sursa de adevăr. Vezi /onboarding.
     const type = parseRole(String(body?.role ?? "STARTUP").toUpperCase());
 
     if (!name || !email || !phone || !password || !confirmPassword) {

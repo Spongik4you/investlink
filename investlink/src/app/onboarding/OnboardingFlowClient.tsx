@@ -2,6 +2,7 @@
 
 import styles from "./onboarding.module.css";
 import { useMemo, useState } from "react";
+import { Target, Rocket, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -36,7 +37,7 @@ type RoleKey = WizardRoleKey;
 
 const ROLES = {
   investor: {
-    badge: "💼 Setting up as Investor",
+    badge: "Setting up as Investor",
     title: "Let's build your investor profile",
     sub: "Answer a few questions so our AI can match you with the right startups and opportunities.",
     steps: [
@@ -51,7 +52,7 @@ const ROLES = {
     topLabel: "Investor Onboarding",
   },
   startup: {
-    badge: "🚀 Setting up as Startup",
+    badge: "Setting up as Startup",
     title: "Let's build your startup profile",
     sub: "Tell us about your company so our AI can match you with the right investors and experts.",
     steps: [
@@ -66,7 +67,7 @@ const ROLES = {
     topLabel: "Startup Onboarding",
   },
   expert: {
-    badge: "🧠 Setting up as Expert",
+    badge: "Setting up as Expert",
     title: "Let's build your expert profile",
     sub: "Show startups and investors what you bring to the table. Precision gets better projects.",
     steps: [
@@ -87,7 +88,17 @@ export default function OnboardingFlowClient() {
   const { update } = useSession();
   const { getSnapshot } = useOnboardingWizard();
 
-  const [role, setRole] = useState<RoleKey>("investor");
+  // Pre-selectăm rolul din sugestia de pe landing (dacă există). NU e obligatoriu
+  // — utilizatorul poate schimba cardul. Sursa de adevăr rămâne alegerea de aici.
+  const [role, setRole] = useState<RoleKey>(() => {
+    if (typeof window !== "undefined") {
+      const s = window.sessionStorage.getItem("investlink:roleSuggestion");
+      if (s === "STARTUP") return "startup";
+      if (s === "EXPERT") return "expert";
+      if (s === "INVESTOR") return "investor";
+    }
+    return "investor";
+  });
   const [step, setStep] = useState<number>(0); // 0 = role picker, 1..6 = steps, 999 = success
   const [submitting, setSubmitting] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
@@ -225,7 +236,13 @@ return (
                     onClick={() => setRole(r)}
                   >
                     <div className={styles.ccIcon}>
-                      {r === "investor" ? "💼" : r === "startup" ? "🚀" : "🧠"}
+                      {r === "investor" ? (
+                        <Target className="h-[22px] w-[22px] text-blue-600" />
+                      ) : r === "startup" ? (
+                        <Rocket className="h-[22px] w-[22px] text-emerald-600" />
+                      ) : (
+                        <Users className="h-[22px] w-[22px] text-violet-600" />
+                      )}
                     </div>
                     <div className={styles.ccContent}>
                       <div className={styles.ccName}>
