@@ -19,8 +19,13 @@ export type InvestorForStartupFilters = {
   sector?: string;
 };
 
-function nameFrom(first?: string | null, last?: string | null): string {
-  return [first?.trim(), last?.trim()].filter(Boolean).join(" ") || "Investor";
+function nameFrom(
+  first?: string | null,
+  last?: string | null,
+  fallback?: string | null,
+): string {
+  const composed = [first?.trim(), last?.trim()].filter(Boolean).join(" ");
+  return composed || fallback?.trim() || "Investor";
 }
 
 function locationOf(country: string | null, city: string | null): string | null {
@@ -40,8 +45,11 @@ export async function getInvestorsForStartup(
   filters: InvestorForStartupFilters = {},
 ): Promise<InvestorForStartupCard[]> {
   const and: Array<Record<string, unknown>> = [
-    // Doar investitori cu profil minim (au nume).
-    { OR: [{ firstName: { not: null } }, { lastName: { not: null } }] },
+    // Poarta reală: investitorul a TERMINAT onboarding-ul — nu „are nume".
+    // Un profil valid dar cu nume gol pe InvestorProfile (numele a rămas doar
+    // pe User) rămânea invizibil pentru toate startup-urile. Vizibilitatea nu
+    // mai depinde de un câmp de afișare.
+    { user: { onboardingStatus: "COMPLETED" } },
   ];
 
   if (filters.search?.trim()) {
@@ -78,6 +86,7 @@ export async function getInvestorsForStartup(
       stages: true,
       ticketMinUsd: true,
       ticketMaxUsd: true,
+      user: { select: { name: true } },
       investmentInterests: {
         where: {
           startupProfileId,
@@ -92,7 +101,7 @@ export async function getInvestorsForStartup(
 
   return investors.map((inv) => ({
     investorProfileId: inv.id,
-    name: nameFrom(inv.firstName, inv.lastName),
+    name: nameFrom(inv.firstName, inv.lastName, inv.user?.name),
     title: inv.professionalTitle,
     investorType: inv.investorType,
     location: locationOf(inv.country, inv.city),

@@ -14,6 +14,21 @@ import { prisma } from "@/lib/prisma";
 
 
 
+/**
+ * Sparge un nume complet în first/last. Plasa de siguranță pentru profil:
+ * după ce pasul 1 a încetat să ceară numele explicit, îl luăm din User.name
+ * (setat la signup) când pasul 1 nu l-a furnizat — ca profilul să nu rămână
+ * fără nume și investitorul/expertul să nu devină „fantomă".
+ */
+function splitName(full?: string | null): {
+  firstName: string | null;
+  lastName: string | null;
+} {
+  const parts = (full ?? "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: null, lastName: null };
+  return { firstName: parts[0], lastName: parts.slice(1).join(" ") || null };
+}
+
 const BodySchema = z.object({
   role: z.enum(["INVESTOR", "STARTUP", "EXPERT"]),
   investorType: z.string().optional(),
@@ -40,7 +55,7 @@ export async function POST(req: Request) {
 
   const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { type: true },
+    select: { type: true, name: true },
   });
 
   if (!dbUser || dbUser.type !== role) {
@@ -72,6 +87,11 @@ export async function POST(req: Request) {
 
     if (role === "INVESTOR") {
       const inv = buildInvestorProfileData(investorType, steps);
+      if (!inv.firstName && !inv.lastName) {
+        const fb = splitName(dbUser.name);
+        inv.firstName = fb.firstName;
+        inv.lastName = fb.lastName;
+      }
       await tx.investorProfile.upsert({
         where: { userId: session.user.id },
         update: inv,
@@ -96,6 +116,11 @@ export async function POST(req: Request) {
 
     if (role === "EXPERT") {
       const ex = buildExpertProfileData(steps);
+      if (!ex.firstName && !ex.lastName) {
+        const fb = splitName(dbUser.name);
+        ex.firstName = fb.firstName;
+        ex.lastName = fb.lastName;
+      }
       await tx.expertProfile.upsert({
         where: { userId: session.user.id },
         update: ex,
