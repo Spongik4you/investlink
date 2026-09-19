@@ -42,11 +42,9 @@ const ROLES = {
     sub: "Answer a few questions so our AI can match you with the right startups and opportunities.",
     steps: [
       { name: "Identity", desc: "Your basic info" },
-      { name: "Investor Type", desc: "Classification & compliance" },
-      { name: "Sector Focus", desc: "Industries & stages" },
-      { name: "Capital Profile", desc: "Budget & risk tolerance" },
-      { name: "Preferences", desc: "Collaboration style" },
-      { name: "Notifications", desc: "Stay informed" },
+      { name: "Investment Profile", desc: "Type, sectors & stages" },
+      { name: "Capital & Style", desc: "Budget, risk & collaboration" },
+      { name: "Finish", desc: "Notifications & done" },
     ],
     prefix: "inv",
     topLabel: "Investor Onboarding",
@@ -57,11 +55,9 @@ const ROLES = {
     sub: "Tell us about your company so our AI can match you with the right investors and experts.",
     steps: [
       { name: "Company Info", desc: "Basic details" },
-      { name: "Industry & Stage", desc: "Your vertical" },
-      { name: "Fundraising", desc: "Round details" },
-      { name: "Team & Traction", desc: "People & metrics" },
-      { name: "Expert Needs", desc: "Collaboration needs" },
-      { name: "Notifications", desc: "Stay informed" },
+      { name: "Vertical & Raise", desc: "Industry, stage & funding" },
+      { name: "Team & Needs", desc: "Traction & expert needs" },
+      { name: "Finish", desc: "Notifications & done" },
     ],
     prefix: "sta",
     topLabel: "Startup Onboarding",
@@ -72,11 +68,9 @@ const ROLES = {
     sub: "Show startups and investors what you bring to the table. Precision gets better projects.",
     steps: [
       { name: "Identity", desc: "Professional details" },
-      { name: "Expertise", desc: "Skills & categories" },
-      { name: "Rates & Availability", desc: "Pricing & schedule" },
-      { name: "Portfolio", desc: "Credibility signals" },
-      { name: "Work Style", desc: "Collaboration prefs" },
-      { name: "Notifications", desc: "Stay informed" },
+      { name: "Expertise & Rates", desc: "Skills, pricing & schedule" },
+      { name: "Portfolio & Style", desc: "Credibility & collaboration" },
+      { name: "Finish", desc: "Notifications & done" },
     ],
     prefix: "exp",
     topLabel: "Expert Onboarding",
@@ -99,7 +93,30 @@ export default function OnboardingFlowClient() {
     }
     return "investor";
   });
-  const [step, setStep] = useState<number>(0); // 0 = role picker, 1..6 = steps, 999 = success
+  const [step, setStep] = useState<number>(0); // 0 = role picker, 1..6 = SUB-pași interni, 999 = success
+
+  // ── COMASARE 6→4 (varianta A, fără risc pentru persistare) ──
+  // Sub-pașii interni (1..6) rămân neschimbați: fiecare componentă își face
+  // useOnboardingStepSync(role, N) cu N-ul ei original, deci datele ajung exact
+  // unde onboarding-persist.ts le așteaptă. Comasăm DOAR afișarea: un „ecran"
+  // vizual randează unul sau doi sub-pași împreună.
+  //
+  //   Ecran 1 → sub-pas 1        (Identity)
+  //   Ecran 2 → sub-pași 2 + 3   (Type + Sectors)
+  //   Ecran 3 → sub-pași 4 + 5   (Params + Preferences)
+  //   Ecran 4 → sub-pas 6        (Notifications) + success
+  const SCREENS: number[][] = [[1], [2, 3], [4, 5], [6]];
+  const TOTAL_SCREENS = SCREENS.length;
+
+  // Ecranul vizual curent, derivat din sub-pasul intern.
+  const screenIndex = SCREENS.findIndex((sub) => sub.includes(step));
+  const currentScreen = screenIndex === -1 ? 0 : screenIndex; // 0-based
+
+  // Un sub-pas se afișează dacă aparține ecranului vizual curent.
+const isSub = (n: number) => step >= 1 && (SCREENS[currentScreen]?.includes(n) ?? false);
+  // Pas AFIȘAT în sidebar/progres: 0 = role picker, 1..4 = ecrane vizuale.
+  // (Sub-pasul intern `step` merge 1..6; nu-l arătăm direct utilizatorului.)
+  const displayStep = step === 0 ? 0 : currentScreen + 1;
   const [submitting, setSubmitting] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
   const cfg = ROLES[role];
@@ -112,15 +129,25 @@ export default function OnboardingFlowClient() {
 
   const progressPct = useMemo(() => {
     if (step === 0) return 0;
-    if (step >= 1 && step <= 6) return Math.round((step / 6) * 100);
+    if (step >= 1 && step <= 6) {
+      return Math.round(((currentScreen + 1) / TOTAL_SCREENS) * 100);
+    }
     return 100;
-  }, [step]);
+  }, [step, currentScreen, TOTAL_SCREENS]);
 
+  // Avansăm/ne întoarcem la nivel de ECRAN: sărim la primul sub-pas al
+  // ecranului vecin. Astfel un ecran cu doi sub-pași e traversat dintr-un click.
   function nextStep() {
-    if (step < 6) setStep((s) => s + 1);
+    if (currentScreen < TOTAL_SCREENS - 1) {
+      setStep(SCREENS[currentScreen + 1][0]);
+    }
   }
   function prevStep() {
-    if (step > 0) setStep((s) => s - 1);
+    if (currentScreen > 0) {
+      setStep(SCREENS[currentScreen - 1][0]);
+    } else {
+      setStep(0); // înapoi la role picker
+    }
   }
 
   async function persistRoleIfNeeded() {
@@ -198,12 +225,13 @@ export default function OnboardingFlowClient() {
 
 return (
   <OnboardingShell
-    left={<LeftPanel role={role} step={step} cfg={cfg} />}
+    left={<LeftPanel role={role} step={displayStep} cfg={cfg} />}
     right={
       <>
         {step !== 999 && (
           <TopProgress
-            step={step}
+            step={displayStep}
+            totalScreens={TOTAL_SCREENS}
             progressPct={progressPct}
             topLabel={cfg.topLabel}
           />
@@ -274,7 +302,7 @@ return (
 
       {/* restul step-urilor rămân momentan exact cum sunt */}
       {/* STEP 1: INVESTOR - Identity */}
-      {role === "investor" && step === 1 && (
+      {role === "investor" && isSub(1) && (
         <InvestorStep1
           onBack={prevStep}
           onNext={nextStep}
@@ -282,7 +310,7 @@ return (
       )}
 
       {/* STEP 2: INVESTOR - Investor Type */}
-      {role === "investor" && step === 2 && (
+      {role === "investor" && isSub(2) && (
         <InvestorStep2
           investorType={investorType}
           setInvestorType={setInvestorType}
@@ -292,62 +320,62 @@ return (
       )}
 
       {/* STEP 3: INVESTOR - Investment Focus */}
-      {role === "investor" && step === 3 && (
+      {role === "investor" && isSub(3) && (
         <InvestorStep3 onBack={prevStep} onNext={nextStep} />
       )}
 
       {/* STEP 4: INVESTOR - Capital & Risk Profile */}
-      {role === "investor" && step === 4 && (
+      {role === "investor" && isSub(4) && (
         <InvestorStep4 onBack={prevStep} onNext={nextStep} />
       )}
 
       {/* STEP 5: INVESTOR - Preferences & Collaboration */}
-      {role === "investor" && step === 5 && (
+      {role === "investor" && isSub(5) && (
         <InvestorStep5 onBack={prevStep} onNext={nextStep} />
       )}
 
       {/* STEP 6: INVESTOR - Notifications */}
-      {role === "investor" && step === 6 && (
+      {role === "investor" && isSub(6) && (
         <InvestorStep6 onBack={prevStep} onComplete={completeProfile} />
       )}
 
       {/* STARTUP steps 1–6 */}
-      {role === "startup" && step === 1 && (
+      {role === "startup" && isSub(1) && (
         <StartupStep1 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "startup" && step === 2 && (
+      {role === "startup" && isSub(2) && (
         <StartupStep2 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "startup" && step === 3 && (
+      {role === "startup" && isSub(3) && (
         <StartupStep3 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "startup" && step === 4 && (
+      {role === "startup" && isSub(4) && (
         <StartupStep4 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "startup" && step === 5 && (
+      {role === "startup" && isSub(5) && (
         <StartupStep5 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "startup" && step === 6 && (
+      {role === "startup" && isSub(6) && (
         <StartupStep6 onBack={prevStep} onComplete={completeProfile} />
       )}
 
       {/* EXPERT steps 1–6 */}
-      {role === "expert" && step === 1 && (
+      {role === "expert" && isSub(1) && (
         <ExpertStep1 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "expert" && step === 2 && (
+      {role === "expert" && isSub(2) && (
         <ExpertStep2 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "expert" && step === 3 && (
+      {role === "expert" && isSub(3) && (
         <ExpertStep3 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "expert" && step === 4 && (
+      {role === "expert" && isSub(4) && (
         <ExpertStep4 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "expert" && step === 5 && (
+      {role === "expert" && isSub(5) && (
         <ExpertStep5 onBack={prevStep} onNext={nextStep} />
       )}
-      {role === "expert" && step === 6 && (
+      {role === "expert" && isSub(6) && (
         <ExpertStep6 onBack={prevStep} onComplete={completeProfile} />
       )}
 
@@ -364,7 +392,7 @@ return (
               ← Back
             </button>
 
-            {step < 6 ? (
+            {currentScreen < TOTAL_SCREENS - 1 ? (
               <button
                 className={styles.btnNext}
                 onClick={nextStep}

@@ -1,9 +1,10 @@
 "use client";
 
 import styles from "@/app/onboarding/onboarding.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
-import { COUNTRIES } from "@/lib/countries";
+import { CountryCitySelect } from "@/components/onboarding/shared/CountryCitySelect";
 
 type Props = {
   onBack: () => void;
@@ -11,8 +12,21 @@ type Props = {
 };
 
 export default function InvestorStep1({ onBack, onNext }: Props) {
+  const { data: session } = useSession();
+
+  // Numele a fost deja cules la signup — nu-l mai cerem. Îl spargem în
+  // first/last din numele contului, ca persistarea (care citește firstName/
+  // lastName) să rămână validă fără să dublăm câmpul în UI.
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+
+  useEffect(() => {
+    const full = session?.user?.name?.trim();
+    if (!full) return;
+    setFirstName((prev) => prev || full.split(/\s+/)[0] || "");
+    setLastName((prev) => prev || full.split(/\s+/).slice(1).join(" ") || "");
+  }, [session?.user?.name]);
+
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [professionalTitle, setProfessionalTitle] = useState("");
@@ -81,70 +95,14 @@ export default function InvestorStep1({ onBack, onNext }: Props) {
         </div>
       </div>
 
-      <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>First Name</label>
-          <input
-            className={styles.formInput}
-            placeholder="Alexander"
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Last Name</label>
-          <input
-            className={styles.formInput}
-            placeholder="Wright"
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Country of Residence</label>
-          <select
-            className={styles.formInput}
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          >
-          <option value="">Select country…</option>
-
-          <optgroup label="Popular">
-            <option value="United States">United States</option>
-            <option value="United Kingdom">United Kingdom</option>
-            <option value="Germany">Germany</option>
-            <option value="Singapore">Singapore</option>
-            <option value="Romania">Romania</option>
-            <option value="Moldova">Moldova</option>
-          </optgroup>
-
-          <optgroup label="All countries">
-            {COUNTRIES.map((country) => (
-              <option key={country} value={country}>
-                {country}
-              </option>
-            ))}
-          </optgroup>
-        </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>City</label>
-          <input
-            className={styles.formInput}
-            placeholder="New York"
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-        </div>
-      </div>
+      <CountryCitySelect
+        country={country}
+        city={city}
+        onCountryChange={setCountry}
+        onCityChange={setCity}
+        countryLabel="Country of Residence"
+        cityLabel="City"
+      />
 
       <div className={styles.formGroup}>
         <label className={styles.formLabel}>Professional Title / Role</label>

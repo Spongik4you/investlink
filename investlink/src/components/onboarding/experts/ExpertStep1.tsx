@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import styles from "@/app/onboarding/onboarding.module.css";
 import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
+import { CountryCitySelect } from "@/components/onboarding/shared/CountryCitySelect";
 
 type Props = {
   onBack: () => void;
@@ -18,10 +20,23 @@ const EDU_OPTIONS = [
 ];
 
 export default function ExpertStep1({ onBack, onNext }: Props) {
+  const { data: session } = useSession();
+
+  // Numele vine de la signup — nu-l mai cerem. Spart în first/last pentru
+  // persistare, fără UI dublat.
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+
+  useEffect(() => {
+    const full = session?.user?.name?.trim();
+    if (!full) return;
+    setFirstName((prev) => prev || full.split(/\s+/)[0] || "");
+    setLastName((prev) => prev || full.split(/\s+/).slice(1).join(" ") || "");
+  }, [session?.user?.name]);
+
   const [title, setTitle] = useState("");
-  const [country, setCountry] = useState("United States");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
   const [yearsExp, setYearsExp] = useState("6–10 years");
 
   const [education, setEducation] = useState("PhD / Doctorate");
@@ -40,6 +55,7 @@ export default function ExpertStep1({ onBack, onNext }: Props) {
       lastName,
       title,
       country,
+      city,
       yearsExp,
       education,
       educationOther,
@@ -53,6 +69,7 @@ export default function ExpertStep1({ onBack, onNext }: Props) {
       lastName,
       title,
       country,
+      city,
       yearsExp,
       education,
       educationOther,
@@ -74,29 +91,6 @@ export default function ExpertStep1({ onBack, onNext }: Props) {
         </div>
       </div>
 
-      <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>First Name</label>
-          <input
-            className={styles.formInput}
-            placeholder="Eleanor"
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Last Name</label>
-          <input
-            className={styles.formInput}
-            placeholder="Vance"
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-      </div>
-
       <div className={styles.formGroup}>
         <label className={styles.formLabel}>Professional Title</label>
         <input
@@ -108,22 +102,16 @@ export default function ExpertStep1({ onBack, onNext }: Props) {
         />
       </div>
 
+      <CountryCitySelect
+        country={country}
+        city={city}
+        onCountryChange={setCountry}
+        onCityChange={setCity}
+        countryLabel="Country"
+        cityLabel="City"
+      />
+
       <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Country</label>
-          <select
-            className={styles.formInput}
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          >
-            <option>United States</option>
-            <option>United Kingdom</option>
-            <option>Germany</option>
-            <option>Singapore</option>
-            <option>Romania</option>
-            <option>Other</option>
-          </select>
-        </div>
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Years of Experience</label>
           <select

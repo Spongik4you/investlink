@@ -282,6 +282,14 @@
   display: block;
 }
 
+/* Când două sub-pași sunt comasați pe același ecran, al doilea primește spațiu
+   și un separator subtil, ca grupurile să nu se lipească vizual. */
+.stepForm.active + .stepForm.active {
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--gray-200);
+}
+
 @keyframes stepIn {
   from {
     opacity: 0;

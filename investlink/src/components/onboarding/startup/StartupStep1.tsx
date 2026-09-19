@@ -3,6 +3,7 @@
 import { useState } from "react";
 import styles from "@/app/onboarding/onboarding.module.css";
 import { useOnboardingStepSync } from "@/contexts/OnboardingWizardContext";
+import { CountryCitySelect } from "@/components/onboarding/shared/CountryCitySelect";
 
 type Props = {
   onBack: () => void;
@@ -12,7 +13,8 @@ type Props = {
 export default function StartupStep1({ onBack, onNext }: Props) {
   const [companyName, setCompanyName] = useState("");
   const [legalType, setLegalType] = useState("LLC");
-  const [country, setCountry] = useState("United States");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
   const [yearFounded, setYearFounded] = useState("");
   const [website, setWebsite] = useState("");
   const [oneLiner, setOneLiner] = useState("");
@@ -26,6 +28,7 @@ export default function StartupStep1({ onBack, onNext }: Props) {
       companyName,
       legalType,
       country,
+      city,
       yearFounded,
       website,
       oneLiner,
@@ -36,6 +39,7 @@ export default function StartupStep1({ onBack, onNext }: Props) {
       companyName,
       legalType,
       country,
+      city,
       yearFounded,
       website,
       oneLiner,
@@ -84,24 +88,16 @@ export default function StartupStep1({ onBack, onNext }: Props) {
         </div>
       </div>
 
-      <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Country of Incorporation</label>
-          <select
-            className={styles.formInput}
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          >
-            <option>United States</option>
-            <option>United Kingdom</option>
-            <option>Germany</option>
-            <option>Singapore</option>
-            <option>Estonia</option>
-            <option>Romania</option>
-            <option>Other</option>
-          </select>
-        </div>
+      <CountryCitySelect
+        country={country}
+        city={city}
+        onCountryChange={setCountry}
+        onCityChange={setCity}
+        countryLabel="Country of Incorporation"
+        cityLabel="City"
+      />
 
+      <div className={styles.formRow}>
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Year Founded</label>
           <input
