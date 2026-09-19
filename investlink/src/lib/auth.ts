@@ -47,6 +47,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      // Leagă automat login-ul Google de un cont existent cu ACELAȘI email.
+      // Sigur aici: Google verifică email-urile, deci nu poate fi revendicat
+      // un email străin. Fără asta, un user cu cont pe parolă care încearcă
+      // Google primește „OAuthAccountNotLinked" și rămâne blocat afară.
+      allowDangerousEmailAccountLinking: true,
     }),
   );
 }
